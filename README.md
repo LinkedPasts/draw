@@ -4,6 +4,6 @@ A pilot application for digitizing features from georeferenced historical maps.
 
 This work-in-progress is a proof of concept tool for use by individuals and small groups in "historical mapathons." It is a side project of [World Historical Gazetteer](http://dev.whgazetteer.org). In time, we hope to see a tool for crowdsourcing this kind of work follow, with many more features. This will require funding and/or volunteer development effort.
 
-![initial mockup](https://github.com/LinkedPasts/mockup01.png)
+![initial mockup](https://github.com/LinkedPasts/draw/blob/master/mockup01.png)
 
 contributors: [@kgeographer](http://github.com/kgeographer), ...
