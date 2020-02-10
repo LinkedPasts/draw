@@ -1,0 +1,16 @@
+_notes/
+_older/
+_scratch/
+media/
+
+.DS_Store
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+whgdraw/__pycache__/
+local_settings.py
+
+/static
