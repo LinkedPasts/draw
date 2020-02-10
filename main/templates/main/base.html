@@ -13,7 +13,7 @@
 	gtag('config', 'UA-147954240-1');
   </script> -->
 
-  {% block title %}<title>whg.draw</title>{% endblock %}
+  {% block title %}<title>linkedplaces.draw</title>{% endblock %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- JQuery -->
@@ -41,20 +41,20 @@
     <!--<nav class="navbar navbar-expand-lg navbar-light">-->
     <nav class="navbar navbar-expand navbar-light">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">whg.draw</a>
+        <a class="navbar-brand" href="{% url 'home' %}">linkedplaces.draw</a>
 		  <div class="small">
         <span id="beta_badge" class="badge badge-warning mr-2">ALPHA 0.1</span>
-        {% fa5_icon 'check' 'fas' %}
       </div>
         <div class="collapse navbar-collapse pt-1" id="navbarNavAltMarkup">
           <div class="navbar-nav ml-auto pt-2">
 			{% if user.is_authenticated %}
-			  <li class="nav-item">
+			  <!-- <li class="nav-item">
 				<a class="nav-link" href="{ url 'dashboard' %}">My Data</a>
-			  </li>
+			  </li> -->
 
 			  <li class="nav-item larger">
-				<a class="nav-link" rel="tooltip" title="{{ user }} settings" href="{ url 'profile' %}">{{ user }}</a>
+				<a class="nav-link" rel="tooltip" title="{{ user }} settings"
+          href="{ url 'profile' %}">{{ user }} {% fa5_icon 'user' 'fas' %}</a>
 			  </li>
 			  <li class="nav-item">
 				<a class="nav-link `ml-5" href="javascript:{document.getElementById('logout').submit()}">Logout</a>

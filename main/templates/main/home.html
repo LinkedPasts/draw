@@ -2,7 +2,7 @@
 {% extends "main/base.html" %}
 {% load leaflet_tags %}
 {% load static %}
-{% block title %}<title>whg.draw</title>{% endblock %}
+{% block title %}<title>lp.draw</title>{% endblock %}
 {% block extra_head %}
   {% leaflet_js %}
   {% leaflet_css %}
@@ -43,13 +43,88 @@
   <script src="{% static 'js/leaflet-draw/edit/handler/Edit.CircleMarker.js' %}"></script>
   <script src="{% static 'js/leaflet-draw/edit/handler/Edit.Circle.js' %}"></script>
 
+  <script src="{% static 'js/leaflet.ajax.min.js' %}"></script>
+  <style>
+    #map {
+      position:relative; top:0; bottom:0; left:0; height:calc(90vh);
+      width: calc(100% - 200px); z-index: 1000; background:aliceblue;
+    }
+    #map_home.leaflet-container {height:100%;)}
+    /* #map { position:absolute; top:0; bottom:0; width:100%; z-index: 1; } */
+    #sidebar { position:relative; right:0; top:0; overflow-x: hidden; overflow-y: auto;
+      padding: 8px; z-index: 1450; background: #f8f8f8; width:200px;}
+    #slider{ position: absolute; top: 10px; right: 10px; z-index: 5; }
+  </style>
 {% endblock %}
 {% block content %}
 <div class="container mt-2">
-  <h4>main/home.html</h4>
-  <p>the whole app goes here</p>
+  <div class="row">
+    <div id="map">{% leaflet_map "map_home" callback="map_init" %}</div>
+    <div id="sidebar" class="">
+      <p>sidebar</p>
+    </div>
+  </div>
 </div>
+
 <script type="text/javascript">
+  $(function(){
+    console.log('start me up')
+  })
+
+  window.addEventListener('map:init', function (e) {
+    window.mappy = e.detail.map
+    mappy.setMaxBounds(null)
+    var attrib_mb = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+            '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      attrib_awmc = 'Tiles and Data &copy; 2013 <a href="http://www.awmc.unc.edu" target="_blank">AWMC</a>',
+      token_mb = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+      token_kg = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
+      token_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
+      token_whg = '',
+      mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}';
+      mbstyle_url = 'https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={token}';
+
+    var awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_awmc, attribution:attrib_awmc}),
+      grayscale = L.tileLayer(mbstyle_url, {id:'kgeographer/cjstfpenh6o1e1fldz95w8m6p', token:token_kg, attribution:attrib_mb}),
+      satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:token_mb, attribution:attrib_mb});
+      osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:token_mb, attribution:attrib_mb});
+
+    var countryStyle = {
+      "color": "#ddd",
+      "weight": 1,
+      "opacity": 0.5,
+      "fillOpacity": 0
+    };
+
+    var countries = new L.GeoJSON.AJAX("/media/data/countries_simplified.json",
+      {style:countryStyle,
+        onEachFeature: function (feature, layer) {
+          popupOptions = {maxWidth: 200};
+            layer.bindPopup(feature.properties.gnlabel, popupOptions);
+          }
+    });
+
+    var baseLayers = {
+      "AWMC Terrain": awmc,
+      "OSM": osm,
+      <!--"Spine Data": grayscale,-->
+      "Satellite": satellite
+    };
+    var dataLayers = {
+      "Countries": countries
+    }
+    mappy.zoomControl.setPosition('topright')
+    L.control.layers(baseLayers,dataLayers).addTo(mappy);
+    baseLayers["AWMC Terrain"].addTo(mappy)
+    dataLayers["Countries"].addTo(mappy)
+  }, false);
+
+  function map_init (home_map, options) {
+    mappy.setView([38, 10], 2.4)
+    // empty features[]
+    geom = {"type":"FeatureCollecton","features":[]}
+  } // end map_init
 
 </script>
 {% endblock %}
