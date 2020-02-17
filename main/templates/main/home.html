@@ -149,7 +149,7 @@
     return feat;
   }
   $(function(){
-    console.log('start me up')
+    // console.log('start me up')
   })
 
   function drawControls(mode){
@@ -172,16 +172,13 @@
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       attrib_awmc = 'Tiles and Data &copy; 2013 <a href="http://www.awmc.unc.edu" target="_blank">AWMC</a>',
-      token_mb = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-      token_kg = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
-      tokens_kg = 'sk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2s2aTVmZmgwMDE0YzNubnluMzluYmR1OSJ9.PasnylWKbyX5k8kwESAFTQ',
-      token_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
       mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}';
-      // mbstyle_url = 'https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={token}';
-      mb_new = 'https://api.mapbox.com/styles/v1/kgeographer/ck6i6861h01as1inz2akfegyb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw'
-    var awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_awmc, attribution:attrib_awmc});
-    var satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:token_mb, attribution:attrib_mb});
-    var arrowsmith1810  = L.tileLayer(mb_new);
+      mb_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
+      mb_new = 'https://api.mapbox.com/styles/v1/kgeographer/ck6i6861h01as1inz2akfegyb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
+      mb_token = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc}),
+      satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb}),
+      arrowsmith1810  = L.tileLayer(mb_new);
 
     // leaflet layers/markers
     drawnLayers = L.featureGroup().addTo(mappy)
@@ -216,7 +213,7 @@
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
       window.drawnlayer = event.layer;
-      console.log('drawnlayer',drawnlayer)
+      // console.log('drawnlayer',drawnlayer)
       drawnlayer.bindPopup(nameForm)
       drawnLayers.addLayer(drawnlayer);
       drawnLayers.addTo(mappy)
@@ -231,7 +228,7 @@
       // add name and type to geojson
       $("#popupform").submit(function(e){
         e.preventDefault();
-        console.log('last feature',findFeat(drawnlayer._leaflet_id));
+        // console.log('last feature',findFeat(drawnlayer._leaflet_id));
         var feat = findFeat(drawnlayer._leaflet_id)
         var name = $("#name_in").val();
         var type = $("#type_in").val();
@@ -258,7 +255,7 @@
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
         return el.properties.leaflet_id == drawnlayer._leaflet_id
       })
-      drawnItems.addTo(mappy)
+      drawnLayers.addTo(mappy)
       console.log('you deleted something')
     });
   }
