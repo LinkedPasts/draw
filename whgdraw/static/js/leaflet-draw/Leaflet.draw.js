@@ -114,7 +114,7 @@ L.drawLocal = {
 			},
 			circlemarker: {
 				tooltip: {
-					start: 'Click map to place circle marker.'
+					start: 'Click map to place, Esc to cancel.'
 				}
 			},
 			marker: {
@@ -159,11 +159,12 @@ L.drawLocal = {
 				cancel: {
 					title: 'Cancel editing, discards all changes',
 					text: 'Cancel'
-				},
-				clearAll: {
-					title: 'Clear all layers',
-					text: 'Clear All'
 				}
+        // KG diffs
+				// ,clearAll: {
+				// 	title: 'Clear all layers',
+				// 	text: 'Clear All'
+				// }
 			},
 			buttons: {
 				edit: 'Edit layers',

@@ -1,9 +1,10 @@
 <!-- main/home.html -->
 {% extends "main/base.html" %}
 {% load leaflet_tags %}
-{% load static %}
+{% load fontawesome_5 %}
 {% block title %}<title>lp.draw</title>{% endblock %}
 {% block extra_head %}
+  {% load static %}
   {% leaflet_js %}
   {% leaflet_css %}
   <script src="{% static 'js/leaflet-draw/Leaflet.draw.js' %}"></script>
@@ -54,6 +55,11 @@
     #sidebar { position:relative; right:0; top:0; overflow-x: hidden; overflow-y: auto;
       padding: 8px; z-index: 1450; background: #f8f8f8; width:200px;}
     #slider{ position: absolute; top: 10px; right: 10px; z-index: 5; }
+    .metadata {position: absolute; background:ivory; bottom:0; height:130px;
+      margin-left:-8px; font-size:smaller; width: 100%; padding: 8px;
+      border-top: 1px solid #ddd;}
+    .table-sm {font-size: .8rem;}
+    .sectionheader {font-size: .6rem; color: #993333;}
   </style>
 {% endblock %}
 {% block content %}
@@ -61,70 +67,201 @@
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}</div>
     <div id="sidebar" class="">
-      <p>sidebar</p>
+      <h5>Project</h5>
+        <div class="form-group">
+          <select id="project_select" class="form-control custom-select-sm">
+            <option value="0">Select project</option>
+            <option value="1">LatAm:Argentina</option>
+            <option value="2">Bregel Atlas</option>
+            <option value="3">18-19c France</option>
+          </select>
+        </div>
+      <h5>Map</h5>
+      <div class="form-group">
+          <select id="map_select" class="form-control custom-select-sm">
+            <option value="0">Select map</option>
+            <option value="1">Colton (1879)</option>
+            <option value="2">Map #6 (p.12)</option>
+            <option value="3">Arrowsmith (1810)</option>
+          </select>
+      </div>
+      <hr/>
+      <div class="stats">
+        <div class="divheader"><h5>Stats</h5></div>
+        <div class="sectionheader">TO DATE</div>
+        <table class="table table-striped table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th>type</th>
+              <th>count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>settlement</td>
+              <td>452</td>
+            </tr>
+            <tr>
+              <td>province</td>
+              <td>35</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="sectionheader">THIS SESSION</div>
+        <table class="table table-striped table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th>type</th>
+              <th>count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>settlement</td>
+              <td>12</td>
+            </tr>
+            <tr>
+              <td>province</td>
+              <td>0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <hr/>
+      <div class="options" align="center">
+        <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
+            Download {% fa5_icon 'file-download' 'fas' %}</button>
+        <button id="btn_save" type="button" class="btn btn-primary btn-sm">
+            Save</button>
+      </div>
+      <!-- <div class="metadata">
+        <p>(Composite Map) Map Exhibiting the Great Post Roads, Physical and Political Divisions of Europe from Original Materials Collected from the Different Countries Delineated by A. Arrowsmith MDCCCX. London Published 2nd. Jany. 1810, by A. Arrowsmith No. 10 Soho Square, Hydrographer to H.R.H. The Prince of Wales. </p>
+      </div> -->
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
+  function findFeat(leafid) {
+    // console.log('findfeat()',leafid)
+    feat=drawnFeatures.find(function(v){
+      return v['properties']['leaflet_id'] === leafid});
+    return feat;
+  }
   $(function(){
     console.log('start me up')
   })
 
+  function drawControls(mode){
+    var drawControl = new L.Control.Draw({
+      draw: {
+         rectangle: false,
+         circle: false,
+         marker: false
+     },
+      edit: {
+         featureGroup: mode
+      }
+    });
+    mappy.addControl(drawControl);
+  }
+
   window.addEventListener('map:init', function (e) {
     window.mappy = e.detail.map
-    mappy.setMaxBounds(null)
     var attrib_mb = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       attrib_awmc = 'Tiles and Data &copy; 2013 <a href="http://www.awmc.unc.edu" target="_blank">AWMC</a>',
       token_mb = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
       token_kg = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
+      tokens_kg = 'sk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2s2aTVmZmgwMDE0YzNubnluMzluYmR1OSJ9.PasnylWKbyX5k8kwESAFTQ',
       token_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
-      token_whg = '',
       mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}';
-      mbstyle_url = 'https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={token}';
+      // mbstyle_url = 'https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={token}';
+      mb_new = 'https://api.mapbox.com/styles/v1/kgeographer/ck6i6861h01as1inz2akfegyb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw'
+    var awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_awmc, attribution:attrib_awmc});
+    var satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:token_mb, attribution:attrib_mb});
+    var arrowsmith1810  = L.tileLayer(mb_new);
 
-    var awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_awmc, attribution:attrib_awmc}),
-      grayscale = L.tileLayer(mbstyle_url, {id:'kgeographer/cjstfpenh6o1e1fldz95w8m6p', token:token_kg, attribution:attrib_mb}),
-      satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:token_mb, attribution:attrib_mb});
-      osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:token_mb, attribution:attrib_mb});
+    // leaflet layers/markers
+    drawnLayers = L.featureGroup().addTo(mappy)
+    drawControls(drawnLayers)
 
-    var countryStyle = {
-      "color": "#ddd",
-      "weight": 1,
-      "opacity": 0.5,
-      "fillOpacity": 0
-    };
-
-    var countries = new L.GeoJSON.AJAX("/media/data/countries_simplified.json",
-      {style:countryStyle,
-        onEachFeature: function (feature, layer) {
-          popupOptions = {maxWidth: 200};
-            layer.bindPopup(feature.properties.gnlabel, popupOptions);
-          }
-    });
+    // geojson gets pushed in here as drawn; also deleted
+    drawnFeatures = []
 
     var baseLayers = {
       "AWMC Terrain": awmc,
-      "OSM": osm,
-      <!--"Spine Data": grayscale,-->
       "Satellite": satellite
     };
-    var dataLayers = {
-      "Countries": countries
+    var overlays = {
+      "Arrowsmith": arrowsmith1810,
+      "Drawn features": drawnLayers
     }
-    mappy.zoomControl.setPosition('topright')
-    L.control.layers(baseLayers,dataLayers).addTo(mappy);
-    baseLayers["AWMC Terrain"].addTo(mappy)
-    dataLayers["Countries"].addTo(mappy)
+
+    layerGroup = L.control.layers(baseLayers,overlays).addTo(mappy);
+    baseLayers['AWMC Terrain'].addTo(mappy)
   }, false);
 
-  function map_init (home_map, options) {
+  nameForm =
+    '<div><form id="popupform"><p>Name: <input type="text" id="name_in" name="name" value=""></p> \
+      <p>Type: <input type="text" id="type_in" name="type" value=""> </p>\
+      <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
+      Save</button></p></form></div>';
+
+  function map_init (map, options) {
     mappy.setView([38, 10], 2.4)
-    // empty features[]
-    geom = {"type":"FeatureCollecton","features":[]}
-  } // end map_init
+
+    // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
+    // feature properties 'name', 'type' added w/popup form
+    mappy.on(L.Draw.Event.CREATED, function (event) {
+      window.drawnlayer = event.layer;
+      console.log('drawnlayer',drawnlayer)
+      drawnlayer.bindPopup(nameForm)
+      drawnLayers.addLayer(drawnlayer);
+      drawnLayers.addTo(mappy)
+      drawnlayer.openPopup()
+      $("#name_in").focus()
+
+      // make geojson immediately, add _leaflet_id
+      feat = drawnlayer.toGeoJSON()
+      feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
+      drawnFeatures.push(feat)
+
+      // add name and type to geojson
+      $("#popupform").submit(function(e){
+        e.preventDefault();
+        console.log('last feature',findFeat(drawnlayer._leaflet_id));
+        var feat = findFeat(drawnlayer._leaflet_id)
+        var name = $("#name_in").val();
+        var type = $("#type_in").val();
+        feat['properties']['name'] = name;
+        feat['properties']['type'] = type;
+        // console.log('props',feat['properties']);
+        mappy.closePopup()
+        $(".leaflet-draw-draw-circlemarker")[0].click()
+      });
+    });
+
+    mappy.on(L.Draw.Event.EDITED, function (event) {
+      var feat = findFeat(drawnlayer._leaflet_id)
+      editedlayer=drawnlayer.toGeoJSON()
+      // replace geometry in geojson with latest
+      console.log('from',feat['geometry'])
+      feat['geometry'] = editedlayer['geometry']
+      console.log('to',feat['geometry'])
+      $(".leaflet-draw-draw-circlemarker").click()
+    });
+
+    mappy.on(L.Draw.Event.DELETED, function (event) {
+      var feat = findFeat(drawnlayer._leaflet_id)
+      drawnFeatures = $.grep(drawnFeatures, function(el,idx){
+        return el.properties.leaflet_id == drawnlayer._leaflet_id
+      })
+      drawnItems.addTo(mappy)
+      console.log('you deleted something')
+    });
+  }
 
 </script>
 {% endblock %}

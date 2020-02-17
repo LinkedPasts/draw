@@ -93,15 +93,15 @@ L.EditToolbar = L.Toolbar.extend({
 				context: this
 			}
 		];
-
-		if (handler.removeAllLayers) {
-			actions.push({
-				title: L.drawLocal.edit.toolbar.actions.clearAll.title,
-				text: L.drawLocal.edit.toolbar.actions.clearAll.text,
-				callback: this._clearAllLayers,
-				context: this
-			});
-		}
+    // KG diffs
+		// if (handler.removeAllLayers) {
+		// 	actions.push({
+		// 		title: L.drawLocal.edit.toolbar.actions.clearAll.title,
+		// 		text: L.drawLocal.edit.toolbar.actions.clearAll.text,
+		// 		callback: this._clearAllLayers,
+		// 		context: this
+		// 	});
+		// }
 
 		return actions;
 	},

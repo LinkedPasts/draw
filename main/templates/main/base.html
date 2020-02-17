@@ -1,8 +1,9 @@
-<!-- { load i18n staticfiles %} -->
+{% load i18n static %}
 <!DOCTYPE html>
 {% load fontawesome_5 %}
 <html lang="en">
 <head>
+  {% fontawesome_5_static %}
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-147954240-1"></script> -->
   <!-- <script>
@@ -30,9 +31,8 @@
 
   <!-- Add additional CSS in static -->
   {% load static %}
-  {% fontawesome_5_static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-  <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+  <!-- <link rel="shortcut icon" type="image/png" href="{ static 'images/favicon.ico' %}"/> -->
   <!-- some pages will want more -->
   {% block extra_head %}{% endblock %}
 </head>
@@ -41,7 +41,7 @@
     <!--<nav class="navbar navbar-expand-lg navbar-light">-->
     <nav class="navbar navbar-expand navbar-light">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">linkedplaces.draw</a>
+        <a class="navbar-brand" href="{% url 'index' %}">linkedplaces.draw</a>
 		  <div class="small">
         <span id="beta_badge" class="badge badge-warning mr-2">ALPHA 0.1</span>
       </div>
@@ -55,7 +55,7 @@
 			  <li class="nav-item larger">
 				<a class="nav-link" rel="tooltip" title="{{ user }} settings"
           href="{ url 'profile' %}">{{ user }} {% fa5_icon 'user' 'fas' %}</a>
-			  </li>
+        </li>
 			  <li class="nav-item">
 				<a class="nav-link `ml-5" href="javascript:{document.getElementById('logout').submit()}">Logout</a>
 				<form id="logout" method="post" action="{% url 'logout' %}">

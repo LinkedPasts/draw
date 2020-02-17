@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'django.contrib.gis',
     'djgeojson',
+    # 'fontawesome',
     'fontawesome_5',
     'leaflet',
 
