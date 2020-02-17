@@ -251,12 +251,13 @@
     });
 
     mappy.on(L.Draw.Event.DELETED, function (event) {
-      var feat = findFeat(drawnlayer._leaflet_id)
+      // id of feature clicked
+      lid = Number(Object.keys(event.layers._layers)[0]);
+      // strip it
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
-        return el.properties.leaflet_id == drawnlayer._leaflet_id
+        return el.properties.leaflet_id != lid;
       })
-      drawnLayers.addTo(mappy)
-      console.log('you deleted something')
+      drawnLayers.addTo(mappy);
     });
   }
 
