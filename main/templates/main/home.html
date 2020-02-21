@@ -7,6 +7,7 @@
   {% load static %}
   {% leaflet_js %}
   {% leaflet_css %}
+  <script src="{% static 'js/FileSaver.min.js' %}"></script>
   <script src="{% static 'js/leaflet-draw/Leaflet.draw.js' %}"></script>
   <script src="{% static 'js/leaflet-draw/Leaflet.Draw.Event.js' %}"></script>
   <link rel="stylesheet" href="{% static 'js/leaflet-draw/leaflet.draw.css' %}"/>
@@ -71,9 +72,9 @@
         <div class="form-group">
           <select id="project_select" class="form-control custom-select-sm">
             <option value="0">Select project</option>
-            <option value="1">LatAm:Argentina</option>
-            <option value="2">Bregel Atlas</option>
-            <option value="3">18-19c France</option>
+            <option value="1" selected>18-19c France</option>
+            <option value="2">LatAm:Argentina</option>
+            <option value="3">Bregel Atlas</option>
           </select>
         </div>
       <h5>Map</h5>
@@ -81,8 +82,8 @@
           <select id="map_select" class="form-control custom-select-sm">
             <option value="0">Select map</option>
             <option value="1">Colton (1879)</option>
-            <option value="2">Map #6 (p.12)</option>
-            <option value="3">Arrowsmith (1810)</option>
+            <option value="2" selected >Arrowsmith (1810)</option>
+            <option value="3">Map #6 (p.12)</option>
           </select>
       </div>
       <hr/>
@@ -200,21 +201,63 @@
     baseLayers['AWMC Terrain'].addTo(mappy)
   }, false);
 
-  nameForm =
+  
+  popupNewForm =
     '<div><form id="popupform"><p>Name: <input type="text" id="name_in" name="name" value=""></p> \
       <p>Type: <input type="text" id="type_in" name="type" value=""> </p>\
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
       Save</button></p></form></div>';
 
+  function popupEditForm (feat) {
+    html = '<div><form id="popupeditform"><p>Name: <input type="text" id="name_in"  \
+      name="name" value="'+feat['properties']['name']+'"></p> \
+      <input type="text" name="lid" value="'+feat['properties']['leaflet_id']+'">\
+      <p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\
+      </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
+      Save</button></p></div>';
+    return html;
+  }
+  function createFeature(feat){
+    console.log('feat in createFeature()',feat)
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('mapid',$("#map_select").val())
+    formData.append('user','{{ user }}')
+    formData.append('jsonb', JSON.stringify(feat))
+    
+    $.ajax({
+      type: 'POST',
+      enctype: 'multipart/form-data',
+      url: 'feature_create/',
+      processData: false,
+      contentType: false,
+      cache: false,
+      data: formData,
+      success:function(result){
+        // returning counts by type: total & this session
+        // TODO: also 'Your total'?
+        console.log('data returned from createFeature()',result)
+      }   
+    })
+  };
+   
   function map_init (map, options) {
-    mappy.setView([38, 10], 2.4)
+    maps = {
+      1:{'label':'foo'},
+      2:{'label':arrowsmith1810,'center':L.latLng(48.7028, -0.6582),'zoom':6},
+      3:{'label':'bar'}
+    }
+    // arrowsmith 48.7028, -0.6582
+    var active = maps[$("#map_select").val()]
+    active['label'].addTo(mappy)
+    mappy.setView(active['center'],active['zoom'])
 
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
       window.drawnlayer = event.layer;
       // console.log('drawnlayer',drawnlayer)
-      drawnlayer.bindPopup(nameForm)
+      drawnlayer.bindPopup(popupNewForm)
       drawnLayers.addLayer(drawnlayer);
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
@@ -224,7 +267,7 @@
       feat = drawnlayer.toGeoJSON()
       feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
       drawnFeatures.push(feat)
-
+      
       // add name and type to geojson
       $("#popupform").submit(function(e){
         e.preventDefault();
@@ -235,7 +278,12 @@
         feat['properties']['name'] = name;
         feat['properties']['type'] = type;
         // console.log('props',feat['properties']);
-        mappy.closePopup()
+        drawnlayer.unbindPopup()
+        mappy.closePopup()        
+        drawnlayer.bindPopup('name: '+name+' type: '+type)
+
+        // ajax to write a Feature instance
+        createFeature(feat)
         $(".leaflet-draw-draw-circlemarker")[0].click()
       });
     });

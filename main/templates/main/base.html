@@ -32,7 +32,7 @@
   <!-- Add additional CSS in static -->
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-  <!-- <link rel="shortcut icon" type="image/png" href="{ static 'images/favicon.ico' %}"/> -->
+   <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/> 
   <!-- some pages will want more -->
   {% block extra_head %}{% endblock %}
 </head>
