@@ -71,18 +71,18 @@
       <h5>Project</h5>
         <div class="form-group">
           <select id="project_select" class="form-control custom-select-sm">
-            <option value="0">Select project</option>
-            <option value="1" selected>18-19c France</option>
+            <option value="0" selected>Select project</option>
+            <option value="1">18-19c France</option>
             <option value="2">LatAm:Argentina</option>
             <option value="3">Bregel Atlas</option>
           </select>
         </div>
       <h5>Map</h5>
       <div class="form-group">
-          <select id="map_select" class="form-control custom-select-sm">
-            <option value="0">Select map</option>
+          <select id="map_select" class="form-control custom-select-sm hidden">
+            <option value="0" selected>Select map</option>
             <option value="1">Colton (1879)</option>
-            <option value="2" selected >Arrowsmith (1810)</option>
+            <option value="2">Arrowsmith (1810)</option>
             <option value="3">Map #6 (p.12)</option>
           </select>
       </div>
@@ -143,6 +143,23 @@
 </div>
 
 <script type="text/javascript">
+  // load data on change of map selector
+  function loadGeodata(proj_id,map_id) {
+    $.get("/api/geoms", {proj: proj_id, map: map_id },
+      function(data){
+        // update counts in UI
+        <!--$("#feature_count").html(data.count+' geometries for {{ ds.numrows }} records')-->
+        geom = {"type":"FeatureCollection","features":[]}
+        geom['features'] = data.results
+        if(geom.features.length < 15000) {
+          renderMap(geom)
+        } else {
+          alert(geom.features.length + ' features -- too many to map!')
+          <!--spinner.stop()-->
+          <!--$(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')-->
+        }
+    })    
+  }
   function findFeat(leafid) {
     // console.log('findfeat()',leafid)
     feat=drawnFeatures.find(function(v){
@@ -150,7 +167,29 @@
     return feat;
   }
   $(function(){
-    // console.log('start me up')
+    // assign variables to some controls
+    project_select = $("#project_select")
+    map_select = $("#map_select")
+    // populate proj_select
+    <!--$.get()-->
+    // listeners
+    project_select.on('change',function(){
+      console.log('proj #', $(this).val())
+      if (project_select.val() >0 ) {
+        // populate map_select
+        map_select.removeClass('hidden')
+        // display it
+      }
+    })
+    map_select.on('change',function(){
+      console.log('map #', $(this).val())
+      // a project is selected
+      if (project_select.val() > 0) {
+        console.log('will run loadGeodata() for map #',$(this).val())
+        <!--loadGeodata($(this).val())      -->
+      } else { alert('please select a project')}
+    })
+    
   })
 
   function drawControls(mode){
@@ -248,10 +287,11 @@
       3:{'label':'bar'}
     }
     // arrowsmith 48.7028, -0.6582
-    var active = maps[$("#map_select").val()]
-    active['label'].addTo(mappy)
-    mappy.setView(active['center'],active['zoom'])
-
+    <!--not here -->
+    <!--var active = maps[$("#map_select").val()]-->
+    <!--active['label'].addTo(mappy)-->
+    <!--mappy.setView(active['center'],active['zoom'])-->
+    mappy.setView(L.latLng(48.7028, -0.6582),6)
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
