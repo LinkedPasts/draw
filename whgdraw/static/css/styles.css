@@ -1,5 +1,8 @@
 /* styles.css */
 
+.hidden {display:none;}
+.smaller {font-size:.7rem;}
+
 /* base */
 .navbar {
   min-height: 0px !important; background: cornsilk;
@@ -7,3 +10,4 @@
 .navbar-nav {padding-top:0 !important; padding-bottom:.2rem !important;}
 /* .navbar-nav > li > a {padding-top:0 !important; padding-bottom:.2rem !important;} */
 header { border-bottom: 1px solid #e8e8e8; }
+

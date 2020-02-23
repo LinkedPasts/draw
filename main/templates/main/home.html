@@ -68,8 +68,8 @@
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}</div>
     <div id="sidebar" class="">
-      <h5>Project</h5>
-        <div class="form-group">
+      <div class="form-group">
+        <h5>Project</h5>
           <select id="project_select" class="form-control custom-select-sm">
             <option value="0" selected>Select project</option>
             <option value="1">18-19c France</option>
@@ -77,9 +77,9 @@
             <option value="3">Bregel Atlas</option>
           </select>
         </div>
-      <h5>Map</h5>
-      <div class="form-group">
-          <select id="map_select" class="form-control custom-select-sm hidden">
+      <div id="div_map_select" class="form-group hidden">
+        <h5>Map</h5>
+          <select id="map_select" class="form-control custom-select-sm">
             <option value="0" selected>Select map</option>
             <option value="1">Colton (1879)</option>
             <option value="2">Arrowsmith (1810)</option>
@@ -88,7 +88,7 @@
       </div>
       <hr/>
       <div class="stats">
-        <div class="divheader"><h5>Stats</h5></div>
+        <div class="divheader"><h5>Stats <span class="smaller"><a href="#">refresh</a></span></h5></div>
         <div class="sectionheader">TO DATE</div>
         <table class="table table-striped table-sm">
           <thead class="thead-light">
@@ -132,8 +132,8 @@
       <div class="options" align="center">
         <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
             Download {% fa5_icon 'file-download' 'fas' %}</button>
-        <button id="btn_save" type="button" class="btn btn-primary btn-sm">
-            Save</button>
+        <!--<button id="btn_save" type="button" class="btn btn-primary btn-sm">-->
+            <!--Save</button>-->
       </div>
       <!-- <div class="metadata">
         <p>(Composite Map) Map Exhibiting the Great Post Roads, Physical and Political Divisions of Europe from Original Materials Collected from the Different Countries Delineated by A. Arrowsmith MDCCCX. London Published 2nd. Jany. 1810, by A. Arrowsmith No. 10 Soho Square, Hydrographer to H.R.H. The Prince of Wales. </p>
@@ -170,6 +170,7 @@
     // assign variables to some controls
     project_select = $("#project_select")
     map_select = $("#map_select")
+    div_map_select = $("#div_map_select")
     // populate proj_select
     <!--$.get()-->
     // listeners
@@ -177,7 +178,7 @@
       console.log('proj #', $(this).val())
       if (project_select.val() >0 ) {
         // populate map_select
-        map_select.removeClass('hidden')
+        div_map_select.show(400)
         // display it
       }
     })
@@ -292,6 +293,7 @@
     <!--active['label'].addTo(mappy)-->
     <!--mappy.setView(active['center'],active['zoom'])-->
     mappy.setView(L.latLng(48.7028, -0.6582),6)
+    
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
