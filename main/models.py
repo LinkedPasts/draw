@@ -10,6 +10,10 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     label = models.CharField(max_length=20)
 
+    class Meta:
+        managed = True
+        db_table = 'projects'    
+
 class Map(models.Model):
     project = models.ForeignKey('main.Project', db_column='project',
         related_name='maps', on_delete=models.CASCADE)
@@ -19,6 +23,9 @@ class Map(models.Model):
     cite_uri = models.URLField(null=True)
     cite_text = models.CharField(max_length=2044, null=False)
 
+    class Meta:
+        managed = True
+        db_table = 'maps'    
 
 class Feature(models.Model):
     # TODO: map and type are reserved - problem?
@@ -34,3 +41,7 @@ class Feature(models.Model):
     geom_point = geo.PointField(blank=True, null=True)
     geom_line = geo.MultiLineStringField(blank=True, null=True)
     geom_poly = geo.MultiPolygonField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'features'    

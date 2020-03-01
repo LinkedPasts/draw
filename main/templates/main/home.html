@@ -179,8 +179,7 @@
       console.log('proj #', $(this).val())
       // clear options
       $(map_select).html('')
-      // display & populate map_select
-      // <option value="1">Colton (1879)</option>
+      // write select options to dom, display map_select dropdown 
       items = projects[$(this).val()]['maps']
       $(map_select).append('<option value="0">Select a map</option>')
       $.each(items, function (i, item) {
@@ -201,7 +200,7 @@
         map = maps.find( ({ label }) => label === $(this).val() )
         mappy.setView(map['center'],map['zoom'])
         mappy.addLayer(eval($(this).val()))
-        console.log('will run loadGeodata() for map #',$(this).val())
+        console.log('will run loadGeodata() for map: ',$(this).val())
       }
         <!--loadGeodata($(this).val())      -->
       <!--} else { alert('please select a project')}-->
@@ -320,21 +319,14 @@
           "zoom": 4} 
         ]}
       ,"france":{"maps":[
-        {"label":'arrowsmith1810',"title":"Arrowsmith (1810)","center":L.latLng(48.7028, -0.6582),"zoom":6}
+        { "label":'arrowsmith1810',
+          "title":"Arrowsmith (1810)",
+          "center":L.latLng(48.7028, -0.6582),
+          "zoom":6}
       ]}
       <!--,"latam":{"maps":[-->
         <!--{"label":"null","center":L.latLng(48.7028, -0.6582),"zoom":6}]}-->
     }
-    <!--projects = {-->
-      <!--"bregel":{"maps":{-->
-        <!--'B32':{"title":"Map #32","view":[L.latLng(48.7028, 69),4]} }}-->
-      <!--,"france":{"maps":{-->
-        <!--'arrowsmith1810':{"title":"Arrowsmith (1810)","view":[L.latLng(48.7028, -0.6582),6]}-->
-      <!--}}-->
-      <!--<!--,"latam":{"maps":[-->-->
-        <!--<!--{"label":"null","center":L.latLng(48.7028, -0.6582),"zoom":6}]}-->-->
-    <!--}-->
-
     // initial
     mappy.setView(L.latLng(35.72, -5.295), 2)
     
@@ -353,6 +345,9 @@
       feat = drawnlayer.toGeoJSON()
       feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
       drawnFeatures.push(feat)
+      
+      // save it immediately
+      createFeature(feat)
       
       // add name and type to geojson
       $("#popupform").submit(function(e){
