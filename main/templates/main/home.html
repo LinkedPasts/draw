@@ -72,18 +72,18 @@
         <h5>Project</h5>
           <select id="project_select" class="form-control custom-select-sm">
             <option value="0" selected>Select project</option>
-            <option value="1">18-19c France</option>
-            <option value="2">LatAm:Argentina</option>
-            <option value="3">Bregel Atlas</option>
+            <!--<option value="latam">LatAm:Argentina</option>-->
+            <option value="bregel">Bregel Atlas</option>
+            <option value="france">18-19c France</option>
           </select>
         </div>
       <div id="div_map_select" class="form-group hidden">
         <h5>Map</h5>
           <select id="map_select" class="form-control custom-select-sm">
             <option value="0" selected>Select map</option>
-            <option value="1">Colton (1879)</option>
-            <option value="2">Arrowsmith (1810)</option>
-            <option value="3">Map #6 (p.12)</option>
+            <!--<option value="1">Colton (1879)</option>-->
+            <!--<option value="2">Arrowsmith (1810)</option>-->
+            <!--<option value="3">Map #32 (p.??)</option>-->
           </select>
       </div>
       <hr/>
@@ -175,20 +175,36 @@
     <!--$.get()-->
     // listeners
     project_select.on('change',function(){
+      proj = $(this).val()
       console.log('proj #', $(this).val())
-      if (project_select.val() >0 ) {
-        // populate map_select
-        div_map_select.show(400)
-        // display it
-      }
+      // clear options
+      $(map_select).html('')
+      // display & populate map_select
+      // <option value="1">Colton (1879)</option>
+      items = projects[$(this).val()]['maps']
+      $(map_select).append('<option value="0">Select a map</option>')
+      $.each(items, function (i, item) {
+        console.log('item',item)
+        $(map_select).append($('<option>', { 
+            value: item.label,
+            text : item.title 
+        }));
+      });
+      div_map_select.show(400)
+      <!--}-->
     })
     map_select.on('change',function(){
-      console.log('map #', $(this).val())
       // a project is selected
-      if (project_select.val() > 0) {
+      maps=projects[project_select.val()]['maps']
+      console.log('maps, load map',maps,$(this).val())
+      if (project_select.val() != 0) {
+        map = maps.find( ({ label }) => label === $(this).val() )
+        mappy.setView(map['center'],map['zoom'])
+        mappy.addLayer(eval($(this).val()))
         console.log('will run loadGeodata() for map #',$(this).val())
+      }
         <!--loadGeodata($(this).val())      -->
-      } else { alert('please select a project')}
+      <!--} else { alert('please select a project')}-->
     })
     
   })
@@ -209,6 +225,15 @@
 
   window.addEventListener('map:init', function (e) {
     window.mappy = e.detail.map
+
+    var options = {
+      minZoom: 5,
+      maxZoom: 11,
+      opacity: 1.0,
+      attribution: 'Rendered with <a href="https://www.maptiler.com/desktop/">MapTiler Desktop</a>',
+      tms: false
+    };
+
     var attrib_mb = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -219,7 +244,11 @@
       mb_token = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
       awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc}),
       satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb}),
-      arrowsmith1810  = L.tileLayer(mb_new);
+      <!--arrowsmith1810  = L.tileLayer(mb_new);-->
+      <!--B32 = L.tileLayer('file:///Users/karlg/Sites/maptiles/bregel/32/{z}/{x}/{y}.png');-->
+      // file:///D:/Tiles/Topo/{z}/{x}/{y}.png
+      B32 = L.tileLayer('http://localhost:8181/bregel/32/{z}/{x}/{y}.png');
+      arrowsmith1810 = L.tileLayer('http://localhost:8181/france/arrowsmith1810/{z}/{x}/{y}.png');
 
     // leaflet layers/markers
     drawnLayers = L.featureGroup().addTo(mappy)
@@ -233,11 +262,13 @@
       "Satellite": satellite
     };
     var overlays = {
+      "Bregel (32)": B32,
       "Arrowsmith": arrowsmith1810,
       "Drawn features": drawnLayers
     }
 
     layerGroup = L.control.layers(baseLayers,overlays).addTo(mappy);
+    <!--layerGroup = L.control.layers(baseLayers).addTo(mappy);-->
     baseLayers['AWMC Terrain'].addTo(mappy)
   }, false);
 
@@ -282,17 +313,30 @@
   };
    
   function map_init (map, options) {
-    maps = {
-      1:{'label':'foo'},
-      2:{'label':arrowsmith1810,'center':L.latLng(48.7028, -0.6582),'zoom':6},
-      3:{'label':'bar'}
+    projects = {
+      "bregel":{"maps":[
+        { "label":'B32',"title":"Map #32",
+          "center":L.latLng(48.7028, 69),
+          "zoom": 4} 
+        ]}
+      ,"france":{"maps":[
+        {"label":'arrowsmith1810',"title":"Arrowsmith (1810)","center":L.latLng(48.7028, -0.6582),"zoom":6}
+      ]}
+      <!--,"latam":{"maps":[-->
+        <!--{"label":"null","center":L.latLng(48.7028, -0.6582),"zoom":6}]}-->
     }
-    // arrowsmith 48.7028, -0.6582
-    <!--not here -->
-    <!--var active = maps[$("#map_select").val()]-->
-    <!--active['label'].addTo(mappy)-->
-    <!--mappy.setView(active['center'],active['zoom'])-->
-    mappy.setView(L.latLng(48.7028, -0.6582),6)
+    <!--projects = {-->
+      <!--"bregel":{"maps":{-->
+        <!--'B32':{"title":"Map #32","view":[L.latLng(48.7028, 69),4]} }}-->
+      <!--,"france":{"maps":{-->
+        <!--'arrowsmith1810':{"title":"Arrowsmith (1810)","view":[L.latLng(48.7028, -0.6582),6]}-->
+      <!--}}-->
+      <!--<!--,"latam":{"maps":[-->-->
+        <!--<!--{"label":"null","center":L.latLng(48.7028, -0.6582),"zoom":6}]}-->-->
+    <!--}-->
+
+    // initial
+    mappy.setView(L.latLng(35.72, -5.295), 2)
     
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
