@@ -72,18 +72,12 @@
         <h5>Project</h5>
           <select id="project_select" class="form-control custom-select-sm">
             <option value="0" selected>Select project</option>
-            <!--<option value="latam">LatAm:Argentina</option>-->
-            <option value="bregel">Bregel Atlas</option>
-            <option value="france">18-19c France</option>
           </select>
         </div>
       <div id="div_map_select" class="form-group hidden">
         <h5>Map</h5>
           <select id="map_select" class="form-control custom-select-sm">
             <option value="0" selected>Select map</option>
-            <!--<option value="1">Colton (1879)</option>-->
-            <!--<option value="2">Arrowsmith (1810)</option>-->
-            <!--<option value="3">Map #32 (p.??)</option>-->
           </select>
       </div>
       <hr/>
@@ -145,20 +139,22 @@
 <script type="text/javascript">
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
-    $.get("/api/geoms", {proj: proj_id, map: map_id },
-      function(data){
-        // update counts in UI
-        <!--$("#feature_count").html(data.count+' geometries for {{ ds.numrows }} records')-->
-        geom = {"type":"FeatureCollection","features":[]}
-        geom['features'] = data.results
-        if(geom.features.length < 15000) {
-          renderMap(geom)
-        } else {
-          alert(geom.features.length + ' features -- too many to map!')
-          <!--spinner.stop()-->
-          <!--$(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')-->
-        }
-    })    
+    <!--console.clear()-->
+    console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)
+    <!--$.get("/api/geoms", {proj: proj_id, map: map_id },-->
+      <!--function(data){-->
+        <!--// update counts in UI-->
+        <!--<!--$("#feature_count").html(data.count+' geometries for {{ ds.numrows }} records')-->-->
+        <!--geom = {"type":"FeatureCollection","features":[]}-->
+        <!--geom['features'] = data.results-->
+        <!--if(geom.features.length < 15000) {-->
+          <!--renderMap(geom)-->
+        <!--} else {-->
+          <!--alert(geom.features.length + ' features -- too many to map!')-->
+          <!--<!--spinner.stop()-->-->
+          <!--<!--$(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')-->-->
+        <!--}-->
+    <!--})    -->
   }
   function findFeat(leafid) {
     // console.log('findfeat()',leafid)
@@ -171,43 +167,68 @@
     project_select = $("#project_select")
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
-    // populate proj_select
-    <!--$.get()-->
-    // listeners
+    
+    // get project and map records
+    $.ajax({ url: 'fetch_projects/' }).done(function(data){
+      <!--console.log('projects & maps',data)-->
+      projdata = data;
+      $.each(data.projects, function (i, p) {
+        <!--console.log('proj',p)-->
+        $(project_select).append($('<option>', { 
+            value: p.id,
+            text : p.title 
+        }));
+      });
+    })
+    
+    // populate map_select
     project_select.on('change',function(){
-      proj = $(this).val()
-      console.log('proj #', $(this).val())
+      projid = parseInt($(this).val())
+      console.log('proj #'+projid)
+      clearMap()
       // clear options
       $(map_select).html('')
       // write select options to dom, display map_select dropdown 
-      items = projects[$(this).val()]['maps']
+      maps = [projdata['maps'].find( ({ project }) => project === projid )]
+      console.log('maps',maps)
+      <!--items = projdata['maps']-->
       $(map_select).append('<option value="0">Select a map</option>')
-      $.each(items, function (i, item) {
-        console.log('item',item)
+      $.each(maps, function (i, map) {
+        <!--console.log('map',map)-->
         $(map_select).append($('<option>', { 
-            value: item.label,
-            text : item.title 
+            value: map.id,
+            text : map.title 
         }));
       });
       div_map_select.show(400)
-      <!--}-->
     })
+    
+    // clear current, load tileset
     map_select.on('change',function(){
-      // a project is selected
-      maps=projects[project_select.val()]['maps']
-      console.log('maps, load map',maps,$(this).val())
-      if (project_select.val() != 0) {
-        map = maps.find( ({ label }) => label === $(this).val() )
-        mappy.setView(map['center'],map['zoom'])
-        mappy.addLayer(eval($(this).val()))
-        console.log('will run loadGeodata() for map: ',$(this).val())
+      clearMap()
+      mapid = parseInt($(this).val())
+      console.log('load map #'+maps,mapid)
+      if (mapid != 0) {
+        mapdict = maps.find( ({ id }) => id === mapid )
+        layer = eval(mapdict['label'])
+        var extent = layer.options.mapExtent
+        var bounds = new L.LatLngBounds(
+          new L.LatLng(extent[1], extent[0]),
+          new L.LatLng(extent[3], extent[2]));
+        <!--mappy.setView(L.latLng(map['center'][0],map['center'][1]),map['zoom'])-->
+        mappy.addLayer(layer)
+        'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
+        console.log('now run loadGeodata() for map #'+mapid)
       }
-        <!--loadGeodata($(this).val())      -->
-      <!--} else { alert('please select a project')}-->
+      loadGeodata(mapdict['project'],mapid)
     })
     
   })
-
+  function clearMap(){
+    $(".leaflet-tilelayers-pane").empty()
+    drawnLayers.clearLayers()
+    drawnFeatures = []
+  }
   function drawControls(mode){
     var drawControl = new L.Control.Draw({
       draw: {
@@ -225,14 +246,6 @@
   window.addEventListener('map:init', function (e) {
     window.mappy = e.detail.map
 
-    var options = {
-      minZoom: 5,
-      maxZoom: 11,
-      opacity: 1.0,
-      attribution: 'Rendered with <a href="https://www.maptiler.com/desktop/">MapTiler Desktop</a>',
-      tms: false
-    };
-
     var attrib_mb = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -246,8 +259,14 @@
       <!--arrowsmith1810  = L.tileLayer(mb_new);-->
       <!--B32 = L.tileLayer('file:///Users/karlg/Sites/maptiles/bregel/32/{z}/{x}/{y}.png');-->
       // file:///D:/Tiles/Topo/{z}/{x}/{y}.png
-      B32 = L.tileLayer('http://localhost:8181/bregel/32/{z}/{x}/{y}.png');
-      arrowsmith1810 = L.tileLayer('http://localhost:8181/france/arrowsmith1810/{z}/{x}/{y}.png');
+      B32 = L.tileLayer('http://localhost:8181/bregel/32/{z}/{x}/{y}.png',{
+        'mapExtent':[39.45611030, 28.70507522, 103.39688562, 60.43081427],
+        'minZoom':4, 'maxZoom':10, 'zoom': 4, 'pane':'tilelayers'
+      });
+      arrowsmith1810 = L.tileLayer('http://localhost:8181/france/arrowsmith1810/{z}/{x}/{y}.png',{
+        'mapExtent':[-5.61314461, 44.99755790, 4.57197565, 52.23936858],
+        'minZoom':5, 'maxZoom':11, 'pane':'tilelayers'
+      });
 
     // leaflet layers/markers
     drawnLayers = L.featureGroup().addTo(mappy)
@@ -261,8 +280,8 @@
       "Satellite": satellite
     };
     var overlays = {
-      "Bregel (32)": B32,
-      "Arrowsmith": arrowsmith1810,
+      <!--"Bregel (32)": B32,-->
+      <!--"Arrowsmith": arrowsmith1810,-->
       "Drawn features": drawnLayers
     }
 
@@ -312,24 +331,9 @@
   };
    
   function map_init (map, options) {
-    projects = {
-      "bregel":{"maps":[
-        { "label":'B32',"title":"Map #32",
-          "center":L.latLng(48.7028, 69),
-          "zoom": 4} 
-        ]}
-      ,"france":{"maps":[
-        { "label":'arrowsmith1810',
-          "title":"Arrowsmith (1810)",
-          "center":L.latLng(48.7028, -0.6582),
-          "zoom":6}
-      ]}
-      <!--,"latam":{"maps":[-->
-        <!--{"label":"null","center":L.latLng(48.7028, -0.6582),"zoom":6}]}-->
-    }
     // initial
     mappy.setView(L.latLng(35.72, -5.295), 2)
-    
+    mappy.createPane('tilelayers')
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {

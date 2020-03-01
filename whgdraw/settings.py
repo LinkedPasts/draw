@@ -85,17 +85,17 @@ WSGI_APPLICATION = 'whgdraw.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    # authentication, etc.
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'whgdraw',
-        'USER':'',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'5432',
-    }
-}
+#DATABASES = {
+    ## authentication, etc.
+    #'default': {
+        #'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        #'NAME': 'whgdraw',
+        #'USER':'',
+        #'PASSWORD':'',
+        #'HOST':'localhost',
+        #'PORT':'5432',
+    #}
+#}
 
 # DATABASES = {
 #     'default': {

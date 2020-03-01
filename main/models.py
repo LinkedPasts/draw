@@ -22,6 +22,7 @@ class Map(models.Model):
     label = models.CharField(max_length=20)
     cite_uri = models.URLField(null=True)
     cite_text = models.CharField(max_length=2044, null=False)
+    #center = ArrayField(base_field)
 
     class Meta:
         managed = True
