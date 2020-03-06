@@ -34,6 +34,7 @@ def createFeature(request):
         type = feature['properties']['type'],
         map = mapobj
     )
+    print('feat',feat)
     result = {"mapid": mapid, "name": feature['properties']['name']}
     return JsonResponse(result,safe=False)
     

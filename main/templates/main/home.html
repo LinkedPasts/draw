@@ -53,6 +53,7 @@
     }
     #map_home.leaflet-container {height:100%;)}
     #slider{ position: absolute; top: 25px; right: 70px; z-index: 400; }
+
     #sidebar { position:relative; right:0; top:0; overflow-x: hidden; overflow-y: auto;
       padding: 8px; z-index: 1450; background: #f8f8f8; width:200px;}
     .metadata {position: absolute; background:ivory; bottom:0; height:130px;
@@ -353,7 +354,7 @@
       drawnFeatures.push(feat)
       
       // save it immediately
-      createFeature(feat)
+      <!--createFeature(feat)-->
       
       // add name and type to geojson
       $("#popupform").submit(function(e){
