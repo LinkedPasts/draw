@@ -52,10 +52,9 @@
       width: calc(100% - 200px); z-index: 1000; background:aliceblue;
     }
     #map_home.leaflet-container {height:100%;)}
-    /* #map { position:absolute; top:0; bottom:0; width:100%; z-index: 1; } */
+    #slider{ position: absolute; top: 25px; right: 70px; z-index: 400; }
     #sidebar { position:relative; right:0; top:0; overflow-x: hidden; overflow-y: auto;
       padding: 8px; z-index: 1450; background: #f8f8f8; width:200px;}
-    #slider{ position: absolute; top: 10px; right: 10px; z-index: 5; }
     .metadata {position: absolute; background:ivory; bottom:0; height:130px;
       margin-left:-8px; font-size:smaller; width: 100%; padding: 8px;
       border-top: 1px solid #ddd;}
@@ -66,7 +65,8 @@
 {% block content %}
 <div class="container mt-2">
   <div class="row">
-    <div id="map">{% leaflet_map "map_home" callback="map_init" %}</div>
+    <div id="map">{% leaflet_map "map_home" callback="map_init" %}
+    <input id="slider" type="range" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
     <div id="sidebar" class="">
       <div class="form-group">
         <h5>Project</h5>
@@ -250,15 +250,16 @@
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       attrib_awmc = 'Tiles and Data &copy; 2013 <a href="http://www.awmc.unc.edu" target="_blank">AWMC</a>',
-      mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}';
       mb_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
-      mb_new = 'https://api.mapbox.com/styles/v1/kgeographer/ck6i6861h01as1inz2akfegyb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
+
+      // mapbox
       mb_token = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc}),
+      mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}',
+
       satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb}),
-      <!--arrowsmith1810  = L.tileLayer(mb_new);-->
-      <!--B32 = L.tileLayer('file:///Users/karlg/Sites/maptiles/bregel/32/{z}/{x}/{y}.png');-->
-      // file:///D:/Tiles/Topo/{z}/{x}/{y}.png
+      osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:mb_token, attribution:attrib_mb}),
+      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc})
+
       B32 = L.tileLayer('http://localhost:8181/bregel/32/{z}/{x}/{y}.png',{
         'mapExtent':[39.45611030, 28.70507522, 103.39688562, 60.43081427],
         'minZoom':4, 'maxZoom':10, 'zoom': 4, 'pane':'tilelayers'
@@ -276,6 +277,7 @@
     drawnFeatures = []
 
     var baseLayers = {
+      "OpenStreetmap": osm,
       "AWMC Terrain": awmc,
       "Satellite": satellite
     };
@@ -287,7 +289,7 @@
 
     layerGroup = L.control.layers(baseLayers,overlays).addTo(mappy);
     <!--layerGroup = L.control.layers(baseLayers).addTo(mappy);-->
-    baseLayers['AWMC Terrain'].addTo(mappy)
+    baseLayers['OpenStreetmap'].addTo(mappy)
   }, false);
 
   
@@ -333,7 +335,7 @@
   function map_init (map, options) {
     // initial
     mappy.setView(L.latLng(35.72, -5.295), 2)
-    mappy.createPane('tilelayers')
+    mappy.createPane('tilelayers').style.zIndex = 200
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
