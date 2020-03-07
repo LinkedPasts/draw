@@ -328,6 +328,12 @@
       success:function(result){
         // returning counts by type: total & this session
         // TODO: also 'Your total'?
+        if(result['errors'][0]=='no map selected') {
+          drawnlayer.removeFrom(mappy)
+          alert('Please select a project and map before creating features')
+          // cancel the draw to drop marker from cursor
+          $(".leaflet-draw-actions a")[0].click()
+        }
         console.log('data returned from createFeature()',result)
       }   
     })

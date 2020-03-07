@@ -1,4 +1,5 @@
 from django.contrib import auth, messages
+from django.contrib.gis.geos import GEOSGeometry
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 import json
@@ -28,16 +29,24 @@ def createFeature(request):
     print('mapid',mapid,type(mapid))
     if mapid > 0:
         feature = json.loads(request.POST['jsonb'])
+        placetype = feature['properties']['type']
+        ftype = feature['geometry']['type']
+        #gfield = 'geom_'+('point' if ftype=='Point' else 'line' if ftype=='LineString' else 'poly')
+        # GEOSGeometry('MULTIPOLYGON((( 1 1, 1 2, 2 2, 1 1)))'))
         mapobj = get_object_or_404(Map, pk=int(mapid))
-        
-        feat = Feature.objects.create(
+        newfeat = Feature(
             user = request.user,
             name = feature['properties']['name'],
-            type = feature['properties']['type'],
-            map = mapobj
+            type = placetype,
+            jsonb = feature,
+            map = mapobj,
+            geom_point = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Point' else None,
+            geom_line = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'LineString' else None,
+            geom_poly = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Polygon' else None,
         )
-        print('feat',feat)
-        result = {"mapid": mapid, "name": feature['properties']['name'], "errors":[]}
+        newfeat.save()
+        print('feat',newfeat)
+        result = {"mapid": mapid, "ftype": ftype, "name": feature['properties']['name'], "errors":[]}
     else:
         # no map selected
         result = {"errors":["no map selected"]}

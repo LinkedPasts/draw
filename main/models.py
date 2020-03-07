@@ -40,8 +40,8 @@ class Feature(models.Model):
     jsonb = JSONField(blank=True, null=True)
     
     geom_point = geo.PointField(blank=True, null=True)
-    geom_line = geo.MultiLineStringField(blank=True, null=True)
-    geom_poly = geo.MultiPolygonField(blank=True, null=True)
+    geom_line = geo.LineStringField(blank=True, null=True)
+    geom_poly = geo.PolygonField(blank=True, null=True)
 
     class Meta:
         managed = True
