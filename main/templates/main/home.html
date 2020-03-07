@@ -272,13 +272,13 @@
       }).addTo(mappy);
     }
     
-    mappy.on('zoomend', function() {
-        var currentZoom = mappy.getZoom();
-        <!--var myRadius = currentZoom*(1/2); //or whatever ratio you prefer-->
-        var myRadius = currentZoom*(1); //or whatever ratio you prefer
-        var myWeight = currentZoom*(1/5); //or whatever ratio you prefer
-        features.setStyle({radius: myRadius, weight: myWeight});
-    });
+    <!--mappy.on('zoomend', function() {-->
+        <!--var currentZoom = mappy.getZoom();-->
+        <!--<!--var myRadius = currentZoom*(1/2); //or whatever ratio you prefer-->-->
+        <!--var myRadius = currentZoom*(1); //or whatever ratio you prefer-->
+        <!--var myWeight = currentZoom*(1/5); //or whatever ratio you prefer-->
+        <!--features.setStyle({radius: myRadius, weight: myWeight});-->
+    <!--});-->
     
     if (geom['features'].length > 1 && geom['features'][0].type == 'Point') {
       <!--mappy.fitBounds(features.getBounds().pad(1))-->
@@ -290,7 +290,7 @@
           feat0.coordinates[1],
           feat0.coordinates[0])
         mappy.setView(latlng, 4)
-      } else if (['MultiLineString','MultiPolygon'].includes(feat0.type)) {
+      } else if (['LineString','Polygon'].includes(feat0.type)) {
         mappy.fitBounds(features.getBounds())
       }
     }
