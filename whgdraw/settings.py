@@ -36,18 +36,19 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.gis',
     'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
 
-    'django.contrib.gis',
     'djgeojson',
-    # 'fontawesome',
+    'rest_framework',
     'fontawesome_5',
     'leaflet',
 
     'accounts.apps.AccountsConfig',
     'main.apps.MainConfig',
+    'api.apps.ApiConfig',
 
 ]
 

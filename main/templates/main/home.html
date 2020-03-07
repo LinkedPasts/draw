@@ -67,7 +67,7 @@
 <div class="container mt-2">
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}
-    <input id="slider" type="range" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
+    <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
     <div id="sidebar" class="">
       <div class="form-group">
         <h5>Project</h5>
@@ -206,6 +206,8 @@
     
     // clear current, load tileset
     map_select.on('change',function(){
+      drawControls(drawnLayers)
+      $("#slider").removeClass('hidden')
       clearMap()
       mapid = parseInt($(this).val())
       console.log('load map #'+maps,mapid)
@@ -272,7 +274,7 @@
 
     // leaflet layers/markers
     drawnLayers = L.featureGroup().addTo(mappy)
-    drawControls(drawnLayers)
+    <!--drawControls(drawnLayers)-->
 
     // geojson gets pushed in here as drawn; also deleted
     drawnFeatures = []
@@ -289,7 +291,6 @@
     }
 
     layerGroup = L.control.layers(baseLayers,overlays).addTo(mappy);
-    <!--layerGroup = L.control.layers(baseLayers).addTo(mappy);-->
     baseLayers['OpenStreetmap'].addTo(mappy)
   }, false);
 
