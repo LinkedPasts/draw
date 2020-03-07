@@ -8,7 +8,7 @@ from main import views
 
 urlpatterns = [
     path(r'', TemplateView.as_view(template_name="main/index.html"), name="index"),
-    path('home', include('main.urls')),
+    path('home/', include('main.urls')),
     #path(r'home/', TemplateView.as_view(
         #template_name="main/home.html"),name="home"),
     

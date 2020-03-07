@@ -170,7 +170,7 @@
     div_map_select = $("#div_map_select")
     
     // get project and map records
-    $.ajax({ url: 'fetch_projects/' }).done(function(data){
+    $.ajax({ url: '/home/fetch_projects/' }).done(function(data){
       <!--console.log('projects & maps',data)-->
       projdata = data;
       $.each(data.projects, function (i, p) {
