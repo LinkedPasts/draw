@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.gis.db import models as geo
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
+from django.conf import settings
 
 class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,

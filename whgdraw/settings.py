@@ -43,12 +43,13 @@ INSTALLED_APPS = [
 
     'djgeojson',
     'rest_framework',
+    'rest_framework_datatables',
     'fontawesome_5',
     'leaflet',
 
     'accounts.apps.AccountsConfig',
     'main.apps.MainConfig',
-    'api.apps.ApiConfig',
+    'api.apps.ApiConfig'
 
 ]
 
@@ -82,6 +83,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'whgdraw.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_datatables.renderers.DatatablesRenderer',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_datatables.filters.DatatablesFilterBackend',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables.pagination.DatatablesPageNumberPagination',
+    'PAGE_SIZE': 15000,
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

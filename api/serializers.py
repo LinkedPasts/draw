@@ -4,6 +4,17 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from main.models import Feature, Map, Project
 
+class GeomSerializer(serializers.ModelSerializer):
+    fid = serializers.ReadOnlyField(source='id')
+    type = serializers.ReadOnlyField(source='jsonb.geometry.type')
+    #name = serializers.ReadOnlyField()
+    placetype = serializers.ReadOnlyField(source='type')
+    coordinates = serializers.ReadOnlyField(source='jsonb.geometry.coordinates')
+
+    class Meta:
+        model = Feature
+        fields = ('fid','name','placetype','type','coordinates')
+
 class FeatureSerializer(serializers.ModelSerializer):
     # id, map, user, name, type, jsonb, geom_point, geom_line, geom_poly
     # jsonb: type:Feature, geometry{type,coordinates}, properties{name,type,leaflet_id}

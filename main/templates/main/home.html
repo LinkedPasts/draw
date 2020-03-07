@@ -141,21 +141,20 @@
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
     <!--console.clear()-->
-    console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)
-    <!--$.get("/api/geoms", {proj: proj_id, map: map_id },-->
-      <!--function(data){-->
-        <!--// update counts in UI-->
-        <!--<!--$("#feature_count").html(data.count+' geometries for {{ ds.numrows }} records')-->-->
-        <!--geom = {"type":"FeatureCollection","features":[]}-->
-        <!--geom['features'] = data.results-->
-        <!--if(geom.features.length < 15000) {-->
-          <!--renderMap(geom)-->
-        <!--} else {-->
-          <!--alert(geom.features.length + ' features -- too many to map!')-->
-          <!--<!--spinner.stop()-->-->
-          <!--<!--$(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')-->-->
-        <!--}-->
-    <!--})    -->
+    <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
+    $.get("/api/geoms", {projid: proj_id, mapid: map_id },
+      function(data){
+        <!--console.log('data',data)-->
+        geom = {"type":"FeatureCollection","features":[]}
+        geom['features'] = data.results
+        if(geom.features.length < 15000) {
+          console.log('geoms',geom)
+          renderMap(geom)
+        } else {
+          <!--spinner.stop()-->
+          $(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')
+        }
+    })  
   }
   function findFeat(leafid) {
     // console.log('findfeat()',leafid)
@@ -185,13 +184,13 @@
     // populate map_select
     project_select.on('change',function(){
       projid = parseInt($(this).val())
-      console.log('proj #'+projid)
+      <!--console.log('proj #'+projid)-->
       clearMap()
       // clear options
       $(map_select).html('')
       // write select options to dom, display map_select dropdown 
       maps = [projdata['maps'].find( ({ project }) => project === projid )]
-      console.log('maps',maps)
+      <!--console.log('maps',maps)-->
       <!--items = projdata['maps']-->
       $(map_select).append('<option value="0">Select a map</option>')
       $.each(maps, function (i, map) {
@@ -210,7 +209,7 @@
       $("#slider").removeClass('hidden')
       clearMap()
       mapid = parseInt($(this).val())
-      console.log('load map #'+maps,mapid)
+      console.log('load map #'+mapid)
       if (mapid != 0) {
         mapdict = maps.find( ({ id }) => id === mapid )
         layer = eval(mapdict['label'])
@@ -221,12 +220,82 @@
         <!--mappy.setView(L.latLng(map['center'][0],map['center'][1]),map['zoom'])-->
         mappy.addLayer(layer)
         'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
-        console.log('now run loadGeodata() for map #'+mapid)
+        <!--console.log('now run loadGeodata() for map #'+mapid)-->
       }
       loadGeodata(mapdict['project'],mapid)
     })
     
   })
+  function renderMap(geom){
+    <!--console.log('dslabel, geom in renderMap()',screen,geom)-->
+    if (geom.features.length==0) {
+      console.log('no features yet')
+      <!--spinner.stop()-->
+    } else {
+      geomtype = geom.features[0]['type']
+      <!--clear out the previous if any-->
+      if(typeof(features)!=='undefined'){
+        mappy.removeLayer(features)
+      }
+      // TODO: style should depend on #features, zoom level
+      function styler(type) {
+        if (type == 'LineString')
+          return {opacity: 1, weight: 1, color: "#336699"}
+        else if (type == 'Point')
+          return {radius: 2, fillOpacity: 0.8, opacity: 1, stroke: false, fillColor:"#ff0000"}
+        else
+          return {fillOpacity: 0.4, opacity: 1, color: "#fff", weight: 1, fillColor:"#993333"}
+      }
+      idToFeature = {}  // for feature lookup
+      features = L.geoJSON(geom, {
+        style: styler(geomtype),
+        pointToLayer: function (feature, latlng) {
+          <!--console.log('feature in renderMap()',feature)-->
+          fid = feature.fid
+          name = feature.name
+          placetype = feature.placetype
+          <!--console.log('matchid',matchid)-->
+          marker = L.circleMarker(latlng).bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
+          idToFeature[fid] = marker
+          return marker
+        }
+        ,onEachFeature: function(feature,layer) {
+          f=feature; l=layer;
+          l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.name+'<br/>'+'type: '+f.placetype);
+          <!--console.log('f,l',feature,layer)-->
+          identifier = feature.fid;
+          if(feature.type != 'Point'){
+            <!--layer.setStyle(styles.default)-->
+            idToFeature[identifier] = layer
+          }
+        }
+      }).addTo(mappy);
+    }
+    
+    mappy.on('zoomend', function() {
+        var currentZoom = mappy.getZoom();
+        <!--var myRadius = currentZoom*(1/2); //or whatever ratio you prefer-->
+        var myRadius = currentZoom*(1); //or whatever ratio you prefer
+        var myWeight = currentZoom*(1/5); //or whatever ratio you prefer
+        features.setStyle({radius: myRadius, weight: myWeight});
+    });
+    
+    if (geom['features'].length > 1 && geom['features'][0].type == 'Point') {
+      <!--mappy.fitBounds(features.getBounds().pad(1))-->
+      mappy.fitBounds(features.getBounds())
+    } else if (geom['features'].length > 0){
+      feat0 = geom['features'][0]
+      if (feat0.type == 'Point') {
+        latlng = L.latLng(
+          feat0.coordinates[1],
+          feat0.coordinates[0])
+        mappy.setView(latlng, 4)
+      } else if (['MultiLineString','MultiPolygon'].includes(feat0.type)) {
+        mappy.fitBounds(features.getBounds())
+      }
+    }
+    <!--spinner.stop()-->
+  }
   function clearMap(){
     $(".leaflet-tilelayers-pane").empty()
     drawnLayers.clearLayers()

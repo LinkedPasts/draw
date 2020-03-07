@@ -15,6 +15,7 @@ urlpatterns = [
     
     #path('home/fetch_projects/', views.fetchProjects, name='fetch-projects'),
     #path('home/feature_create/', views.createFeature, name='feature-create'),
+    path('api/', include('api.urls')),
     path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls)
 ]

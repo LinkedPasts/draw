@@ -1,5 +1,5 @@
 # api.views
-#from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group
 #from django.db.models import Count
 #from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -7,12 +7,29 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
 
-from api.serializers import FeatureSerializer
+from api.serializers import GeomSerializer, FeatureSerializer
 
 #from accounts.permissions import IsOwnerOrReadOnly, IsOwner
 from main.models import Feature, Map, Project
 
-class FeatureViewSet(viewsets.ModelViewSet):
+# geometry for map
+class GeomViewSet(viewsets.ModelViewSet):
+    queryset = Feature.objects.all()
+    serializer_class = GeomSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    
+    def get_queryset(self):
+        projid = self.request.GET.get('projid')
+        mapid = self.request.GET.get('mapid')
+        user = self.request.GET.get('user')
+        mapIds = Map.objects.values('id').filter(project = projid)
+        qs = Feature.objects.filter(map__in=mapIds)
+        #print('qs count',qs.count())
+        return qs
+
+# Linked Places record
+# not operational
+class LPViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
     serializer_class = FeatureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
