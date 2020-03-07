@@ -313,7 +313,7 @@
     console.log('feat in createFeature()',feat)
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-    formData.append('mapid',$("#map_select").val())
+    formData.append('mapid', $("#map_select").val())
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
     

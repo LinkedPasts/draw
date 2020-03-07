@@ -24,17 +24,22 @@ def fetchProjects(request):
     
 def createFeature(request):
     print('in createFeature()', request.POST)
-    mapid = request.POST['mapid']
-    feature = json.loads(request.POST['jsonb'])
-    mapobj = get_object_or_404(Map, pk=int(mapid))
-    
-    feat = Feature.objects.create(
-        user = request.user,
-        name = feature['properties']['name'],
-        type = feature['properties']['type'],
-        map = mapobj
-    )
-    print('feat',feat)
-    result = {"mapid": mapid, "name": feature['properties']['name']}
+    mapid = int(request.POST['mapid'])
+    print('mapid',mapid,type(mapid))
+    if mapid > 0:
+        feature = json.loads(request.POST['jsonb'])
+        mapobj = get_object_or_404(Map, pk=int(mapid))
+        
+        feat = Feature.objects.create(
+            user = request.user,
+            name = feature['properties']['name'],
+            type = feature['properties']['type'],
+            map = mapobj
+        )
+        print('feat',feat)
+        result = {"mapid": mapid, "name": feature['properties']['name'], "errors":[]}
+    else:
+        # no map selected
+        result = {"errors":["no map selected"]}
     return JsonResponse(result,safe=False)
     

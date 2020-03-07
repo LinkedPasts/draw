@@ -8,13 +8,13 @@ from main import views
 
 urlpatterns = [
     path(r'', TemplateView.as_view(template_name="main/index.html"), name="index"),
-    # path(r'^home/$', TemplateView.as_view(template_name="main/home.html"), name="home"),
-    path(r'home/', TemplateView.as_view(
-        template_name="main/home.html"),name="home"),
+    path('home', include('main.urls')),
+    #path(r'home/', TemplateView.as_view(
+        #template_name="main/home.html"),name="home"),
     
     
-    path('home/fetch_projects/', views.fetchProjects, name='fetch-projects'),
-    path('home/feature_create/', views.createFeature, name='feature-create'),
+    #path('home/fetch_projects/', views.fetchProjects, name='fetch-projects'),
+    #path('home/feature_create/', views.createFeature, name='feature-create'),
     path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls)
 ]
