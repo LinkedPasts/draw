@@ -1,11 +1,89 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import auth, messages
 from django.contrib.gis.geos import GEOSGeometry
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import (
+  CreateView, DeleteView, ListView, UpdateView, View, FormView)
+
 import json
+from .utils import myprojects
+from .models import Project, Map, Feature
+from .forms import ProjectCreateModelForm, MapCreateModelForm
 
-from main.models import Project, Map, Feature
+class DashboardView(LoginRequiredMixin, ListView):
+    context_object_name = 'dataset_list'
+    template_name = 'datasets/dashboard.html'
 
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+
+    def get_queryset(self):
+        # TODO: make .team() a method on User
+        me = self.request.user
+        if me.username in ['admin','karlg']:
+            print('in get_queryset() if',me)
+            return Project.objects.all().order_by('-id')
+        else:
+            # returns permitted datasets (rw) + black and dplace (ro)
+            return Project.objects.filter( Q(id__in=myprojects(me)) | Q(owner=me) | Q(id__lt=3)).order_by('-id')
+
+    def get_context_data(self, *args, **kwargs):
+        me = self.request.user
+        context = super(DashboardView, self).get_context_data(*args, **kwargs)
+        print('in get_context',me)
+
+        types_ok=['ccodes','copied','drawn']
+        # list areas
+        userareas = Area.objects.all().filter(type__in=types_ok).order_by('created')
+        context['area_list'] = userareas if me.username == 'whgadmin' else userareas.filter(owner=self.request.user)
+
+        context['viewable'] = ['uploaded','inserted','reconciling','review_hits','reviewed','review_whg','indexed']
+        # TODO: user place collections
+        #print('DashboardView context:', context)
+        return context
+
+class ProjectCreateView(LoginRequiredMixin, CreateView):
+    form_class = ProjectCreateModelForm
+    template_name = 'main/project_create.html'
+    success_message = 'project created'
+
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+
+class MapCreateView(LoginRequiredMixin, CreateView):
+    form_class = MapCreateModelForm
+    template_name = 'main/map_create.html'
+    success_message = 'map created'
+
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+
+
+class ProjectDeleteView(DeleteView):
+    template_name = 'main/project_delete.html'
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Project, id=id_)
+
+    def get_success_url(self):
+        return reverse('home')
+
+class MapDeleteView(DeleteView):
+    template_name = 'main/map_delete.html'
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Map, id=id_)
+
+    def get_success_url(self):
+        return reverse('home')
+
+
+
+@login_required
 def fetchProjects(request):
     print('in fetchProject()', request.GET)
     result = {"projects":[], "maps":[]}
@@ -22,7 +100,8 @@ def fetchProjects(request):
         )
     
     return JsonResponse(result,safe=False)
-    
+
+@login_required    
 def createFeature(request):
     print('in createFeature()', request.POST)
     mapid = int(request.POST['mapid'])

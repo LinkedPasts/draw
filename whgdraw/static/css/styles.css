@@ -1,6 +1,6 @@
 /* styles.css */
 
-h5 {font-family: 'Raleway', sans-serif;}
+h4, h5 {font-family: 'Raleway', sans-serif;}
 .hidden {display:none;}
 .smaller {font-size:.7rem;}
 
@@ -10,7 +10,7 @@ h5 {font-family: 'Raleway', sans-serif;}
   padding-top: 0; padding-bottom: 0.1rem; font-family: 'Raleway', sans-serif; }
 .navbar-nav {padding-top:0 !important; padding-bottom:.2rem !important;}
 /* .navbar-nav > li > a {padding-top:0 !important; padding-bottom:.2rem !important;} */
-header { border-bottom: 1px solid #e8e8e8; }
+header { border-bottom: 2px solid #e8e8e8; }
 
 /*font-family: 'Raleway', sans-serif;*/
 /*font-family: 'EB Garamond', serif*/;

@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models as geo
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 from django.conf import settings
+from main.choices import TEAMROLES
 
 class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -10,6 +12,8 @@ class Project(models.Model):
 
     title = models.CharField(max_length=255)
     label = models.CharField(max_length=20)
+    uri = models.URLField(blank=True, null=True)
+    create_date = models.DateTimeField(null=True, auto_now_add=True)
 
     class Meta:
         managed = True
@@ -18,12 +22,14 @@ class Project(models.Model):
 class Map(models.Model):
     project = models.ForeignKey('main.Project', db_column='project',
         related_name='maps', on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+        related_name='maps', on_delete=models.CASCADE)
 
     title = models.CharField(max_length=255)
     label = models.CharField(max_length=20)
     cite_uri = models.URLField(null=True)
     cite_text = models.CharField(max_length=2044, null=False)
-    #center = ArrayField(base_field)
+    create_date = models.DateTimeField(null=True, auto_now_add=True)
 
     class Meta:
         managed = True
@@ -47,3 +53,15 @@ class Feature(models.Model):
     class Meta:
         managed = True
         db_table = 'features'    
+
+class ProjectUser(models.Model):
+    project = models.ForeignKey(Project, related_name='projects',
+        default=-1, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='users',
+        default=-1, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, null=False, choices=TEAMROLES)
+
+    class Meta:
+        managed = True
+        db_table = 'project_user'
+            

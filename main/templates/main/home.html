@@ -226,6 +226,34 @@
     })
     
   })
+  
+  styles = {
+    'marker_default': {
+      fillColor: "#ff0000",
+      color:"#ff0000",
+      weight:1,
+      fillOpacity:0.5,
+      opacity:0.5},
+    'marker_highlight': {
+      radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"
+    },
+    'line_default':{
+      weight:3,
+      opacity:1,
+      color: "#00ccff"
+    },
+    'line_highlight':{weight: 4, color:"yellow"},
+    'pgon_default':{
+      fillColor: "#ff0000",
+      color:"#fff",
+      weight:2,
+      fillOpacity:0.1,
+      opacity:1},
+    'pgon_highlight':{
+      fillOpacity:1,fillColor:"yellow",color:"#000"
+    }
+  }
+
   function renderMap(geom){
     <!--console.log('dslabel, geom in renderMap()',screen,geom)-->
     if (geom.features.length==0) {
@@ -247,6 +275,7 @@
           return {fillOpacity: 0.4, opacity: 1, color: "#fff", weight: 1, fillColor:"#993333"}
       }
       idToFeature = {}  // for feature lookup
+      
       features = L.geoJSON(geom, {
         style: styler(geomtype),
         pointToLayer: function (feature, latlng) {
@@ -255,7 +284,7 @@
           name = feature.name
           placetype = feature.placetype
           <!--console.log('matchid',matchid)-->
-          marker = L.circleMarker(latlng).bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
+          marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
           idToFeature[fid] = marker
           return marker
         }
@@ -264,10 +293,12 @@
           l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.name+'<br/>'+'type: '+f.placetype);
           <!--console.log('f,l',feature,layer)-->
           identifier = feature.fid;
-          if(feature.type != 'Point'){
-            <!--layer.setStyle(styles.default)-->
-            idToFeature[identifier] = layer
+          if(feature.type == 'LineString'){
+            layer.setStyle(styles.line_default)
+          } else if(feature.type == 'Polygon'){
+            layer.setStyle(styles.pgon_default)
           }
+          idToFeature[identifier] = layer
         }
       }).addTo(mappy);
     }
