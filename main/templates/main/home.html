@@ -69,6 +69,7 @@
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}
     <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
     <div id="sidebar" class="">
+      {{ context }}
       <div class="form-group">
         <h5>Project</h5>
           <select id="project_select" class="form-control custom-select-sm">
@@ -138,6 +139,11 @@
 </div>
 
 <script type="text/javascript">
+  function get_counts(data) {
+    counts={"points":0,"lines":0,"polygons":0}
+    return counts  
+  }
+    
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
     <!--console.clear()-->
@@ -145,8 +151,11 @@
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
         <!--console.log('data',data)-->
-        geom = {"type":"FeatureCollection","features":[]}
+        geom = {  "type":"FeatureCollection",
+                  "features":[],
+                  "properties":{"counts":get_counts(data.results)}}
         geom['features'] = data.results
+        geom['properties']['counts']
         if(geom.features.length < 15000) {
           console.log('geoms',geom)
           renderMap(geom)
@@ -204,6 +213,7 @@
     })
     
     // clear current, load tileset
+    // TODO: set max extent per map
     map_select.on('change',function(){
       drawControls(drawnLayers)
       $("#slider").removeClass('hidden')

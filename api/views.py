@@ -26,6 +26,11 @@ class GeomViewSet(viewsets.ModelViewSet):
         qs = Feature.objects.filter(map__in=mapIds)
         #print('qs count',qs.count())
         return qs
+    
+    #def get_context_data(self, *args, **kwargs):
+        #context = super(GeomViewSet, self).get_context_data(*args, **kwargs)
+        #context['foo'] = 'bar'
+        #return context    
 
 # Linked Places record
 # not operational
