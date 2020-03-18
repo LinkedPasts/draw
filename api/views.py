@@ -16,6 +16,7 @@ from main.models import Feature, Map, Project
 class GeomViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
     serializer_class = GeomSerializer
+    #serializer_class = FeatureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     
     def get_queryset(self):

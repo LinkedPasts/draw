@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import (
   CreateView, DeleteView, ListView, UpdateView, View, FormView)
 
-import json
+import json, sys
 from .utils import myprojects
 from .models import Project, Map, Feature
 from .forms import ProjectCreateModelForm, MapCreateModelForm
@@ -101,6 +101,31 @@ def fetchProjects(request):
     
     return JsonResponse(result,safe=False)
 
+@login_required    
+def deleteFeature(request,*args,**kwargs):
+    print('deleteFeature() request', request)
+    print('in deleteFeature() kwargs', kwargs)
+    if request.method == 'POST':
+        _id = request.POST.get('fid')
+        #result = {"msg":"id in kwargs: "+str(_id)}
+        try:
+            get_object_or_404(Feature, pk=_id).delete()
+            result = {"msg":"deleted "+str(_id)}
+        except:
+            result = {"msg":"delete of "+str(id)+' failed: '+sys.exc_info()}
+            print('delete failed',_id, sys.exc_info())
+    return JsonResponse(result,safe=False)
+    
+@login_required    
+def updateFeature(request):
+    feature = json.loads(request.POST['jsonb'])
+    print('in updateFeature()', feature)
+    get_object_or_404(Feature, pk=int(fid))
+    
+
+    result = {"msg":"updated"+request.POST['jsonb']}    
+    return JsonResponse(result,safe=False)
+    
 @login_required    
 def createFeature(request):
     print('in createFeature()', request.POST)
