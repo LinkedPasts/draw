@@ -240,6 +240,7 @@
     'marker_default': {
       fillColor: "#ff0000",
       color:"#ff0000",
+      radius:6,
       weight:1,
       fillOpacity:0.5,
       opacity:0.5},
@@ -276,18 +277,18 @@
         mappy.removeLayer(features)
       }
       // TODO: style should depend on #features, zoom level
-      function styler(type) {
-        if (type == 'LineString')
-          return {opacity: 1, weight:4 , color: "#fff"}
-        else if (type == 'Point')
-          return {radius: 2, fillOpacity: 0.8, opacity: 1, stroke: false, fillColor:"#ff0000"}
-        else
-          return {fillOpacity: 0.4, opacity: 1, color: "#fff", weight: 1, fillColor:"#993333"}
-      }
+      <!--function styler(type) {-->
+        <!--if (type == 'LineString')-->
+          <!--return {opacity: 1, weight:4 , color: "#fff"}-->
+        <!--else if (type == 'Point')-->
+          <!--return {radius: 2, fillOpacity: 0.8, opacity: 1, stroke: false, fillColor:"#ff0000"}-->
+        <!--else-->
+          <!--return {fillOpacity: 0.4, opacity: 1, color: "#fff", weight: 1, fillColor:"#993333"}-->
+      <!--}-->
       idToFeature = {}  // for feature lookup
       
       features = L.geoJSON(geom, {
-        style: styler(geomtype),
+        <!--style: styler(geomtype),-->
         pointToLayer: function (feature, latlng) {
           <!--console.log('feature in renderMap()',feature)-->
           fid = feature.fid
@@ -300,6 +301,7 @@
         }
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
+          console.log('f,l in renderMap()',f,l)
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
           <!--l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.name+'<br/>'+'type: '+f.placetype);-->
