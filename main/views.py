@@ -118,12 +118,28 @@ def deleteFeature(request,*args,**kwargs):
     
 @login_required    
 def updateFeature(request):
-    feature = json.loads(request.POST['jsonb'])
-    print('in updateFeature()', feature)
-    get_object_or_404(Feature, pk=int(fid))
+    # TODO: feature nested in geometry object
+    feat = json.loads(request.POST['jsonb'])['geometry']
+    _id = feat['fid']
+    name = feat['name']
+    placetype = feat['properties']['type']
+    print('in updateFeature()', feat)
+    # get existing 
+    fobj = get_object_or_404(Feature, pk=_id)
+    ftype = feat['type'] # Point, LineString, etc
+    # replace some values
+    fobj.name = name,
+    fobj.placetype = placetype,
+    fobj.jsonb = feat,
+    fobj.geom_point = GEOSGeometry(json.dumps(feat)) if ftype == 'Point' else None
+    fobj.geom_line = GEOSGeometry(json.dumps(feat)) if ftype == 'LineString' else None
+    fobj.geom_poly = GEOSGeometry(json.dumps(feat)) if ftype == 'Polygon' else None
     
-
-    result = {"msg":"updated"+request.POST['jsonb']}    
+    try:
+        fobj.save()
+        result = {"msg":"updated"+request.POST['jsonb']}    
+    except:
+        result = {"msg":"updating "+_id+' failed'}
     return JsonResponse(result,safe=False)
     
 @login_required    
@@ -141,7 +157,7 @@ def createFeature(request):
         newfeat = Feature(
             user = request.user,
             name = feature['properties']['name'],
-            type = placetype,
+            placetype = placetype,
             jsonb = feature,
             map = mapobj,
             geom_point = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Point' else None,

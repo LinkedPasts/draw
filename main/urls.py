@@ -15,7 +15,6 @@ urlpatterns = [
     path('fetch_projects/', views.fetchProjects, name='fetch-projects'),
     path('feature_create/', views.createFeature, name='feature-create'),
     path('feature_delete/', views.deleteFeature, name='feature-delete'),
-    #path('<int:id>/delete', views.DatasetDeleteView.as_view(), name='dataset-delete'),    
-    path('feature/<int:fid>/update', views.updateFeature, name='feature-update'),
+    path('feature_update/', views.updateFeature, name='feature-update'),
 ]
 # + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

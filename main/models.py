@@ -43,7 +43,7 @@ class Feature(models.Model):
         related_name='features', on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255)
-    type = models.CharField(max_length=20, blank=False, null=False)
+    placetype = models.CharField(max_length=20, blank=False, null=False)
     jsonb = JSONField(blank=True, null=True)
     
     geom_point = geo.PointField(blank=True, null=True)

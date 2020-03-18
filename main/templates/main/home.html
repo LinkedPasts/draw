@@ -278,7 +278,7 @@
       // TODO: style should depend on #features, zoom level
       function styler(type) {
         if (type == 'LineString')
-          return {opacity: 1, weight: 1, color: "#336699"}
+          return {opacity: 1, weight:4 , color: "#fff"}
         else if (type == 'Point')
           return {radius: 2, fillOpacity: 0.8, opacity: 1, stroke: false, fillColor:"#ff0000"}
         else
@@ -423,11 +423,8 @@
   }
   // delete json feature in db on layer delete
   function deleteFeature(fid){
-    <!--var formData = new FormData();-->
-    <!--formData.append('csrfmiddlewaretoken', '{ csrf_token }}');-->
-    console.log('crf','{{ csrf_token }}')
+    console.log('token','{{ csrf_token }}')
     $.ajax({
-        <!--type: 'DELETE',-->
         type: 'POST',
         url: 'feature_delete/',
         data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,
@@ -438,9 +435,16 @@
       })
   }
 
-  // update json feature in db on layer edit
+  // updates json feature in drawnFeatures and db on EDITED
   function updateFeature(feat){
+    console.clear()
     console.log('feat in updateFeature()',feat)
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('mapid', $("#map_select").val())
+    formData.append('user','{{ user }}')
+    formData.append('jsonb', JSON.stringify(feat))
+
     $.ajax({
       type: 'POST',
       enctype: 'multipart/form-data',
@@ -450,11 +454,21 @@
       cache: false,
       data: formData,
       success:function(result){
-        console.log(JSON.stringify(result))
-      }
+        // returning success or failure message
+        <!--if(result['errors'][0]=='no map selected') {-->
+          <!--drawnlayer.removeFrom(mappy)-->
+          <!--alert('Please select a project and map before creating features')-->
+          <!--// cancel the draw to drop marker from cursor-->
+          <!--$(".leaflet-draw-actions a")[0].click()-->
+        <!--}-->
+        console.log('updateFeature() result:',result)
+      }   
     })
   }
   
+  <!--function parseCoords(lcoords):-->
+    
+    <!--return coords-->
   // create json feature in db
   function createFeature(feat){
     console.log('feat in createFeature()',feat)
@@ -463,7 +477,7 @@
     formData.append('mapid', $("#map_select").val())
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
-    
+
     $.ajax({
       type: 'POST',
       enctype: 'multipart/form-data',
@@ -531,14 +545,24 @@
 
     mappy.on(L.Draw.Event.EDITED, function (event) {
       e = event
-      <!--window.drawnlayer = event.layer;-->
-      console.log('event',event)
-      <!--var feat = findFeat(drawnlayer._leaflet_id)-->
-      <!--editedlayer=drawnlayer.toGeoJSON()-->
-      // replace geometry in geojson with latest
-      <!--console.log('from',feat['geometry'])-->
-      <!--feat['geometry'] = editedlayer['geometry']-->
-      <!--console.log('to',feat['geometry'])-->
+      console.log('event',e)
+      layerid = Number(Object.keys(e.layers._layers)[0]);
+      
+      // feature id of layer clicked
+      fid = e.layers._layers[layerid].feature.geometry.fid
+
+      feat = idToFeature[fid].feature
+      // {type:"Feature",properties:{},geometry:{fid:<int>,name:"",placetype:"",coordinates:[}}
+
+      ftype = feat.geometry.type
+      console.log('ftype',ftype)
+      lcoords = ftype=='Point' ? e.layers._layers[layerid]._latlng : e.layers._layers[layerid]._latlngs
+
+      // update geometry from layer
+      <!--feat['geometry']['coordinates'] = parseCoords(lcoords)-->
+
+      // update database copy
+      updateFeature(feat)
       $(".leaflet-draw-draw-circlemarker").click()
     });
 
