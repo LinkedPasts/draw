@@ -1,11 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import auth, messages
+#from django.contrib import auth, messages
 from django.contrib.gis.geos import GEOSGeometry
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import (
-  CreateView, DeleteView, ListView, UpdateView, View, FormView)
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.generic import (CreateView, DeleteView, ListView)
 
 import json, sys
 from .utils import myprojects
@@ -118,28 +117,27 @@ def deleteFeature(request,*args,**kwargs):
     
 @login_required    
 def updateFeature(request):
-    # TODO: feature nested in geometry object
-    feat = json.loads(request.POST['jsonb'])['geometry']
-    _id = feat['fid']
-    name = feat['name']
-    placetype = feat['properties']['type']
-    print('feat in updateFeature()', feat)
+    newfeat = json.loads(request.POST['jsonb'])
+    _id = newfeat['fid']
+    name = newfeat['properties']['name']; print(name)
+    placetype = newfeat['properties']['placetype']; print(placetype)
+    print('newfeat in updateFeature(), type', newfeat,type(newfeat))
     # get existing 
-    fobj = get_object_or_404(Feature, pk=_id)
-    ftype = feat['type'] # Point, LineString, etc
+    #fobj = get_object_or_404(Feature, pk=_id)
+    fobj = Feature.objects.filter(pk=_id)
+    ftype = newfeat['geometry']['type']; print(ftype) # Point, LineString, etc
+    geowkt = GEOSGeometry(json.dumps(newfeat['geometry']))
     # replace some values
-    fobj.name = name,
-    fobj.placetype = placetype,
-    fobj.jsonb = feat,
-    fobj.geom_point = GEOSGeometry(json.dumps(feat)) if ftype == 'Point' else None
-    fobj.geom_line = GEOSGeometry(json.dumps(feat)) if ftype == 'LineString' else None
-    fobj.geom_poly = GEOSGeometry(json.dumps(feat)) if ftype == 'Polygon' else None
-    
     try:
-        fobj.save()
-        result = {"msg":"updated"+request.POST['jsonb']}    
+        fobj.update(name = name)
+        fobj.update(placetype = placetype)
+        fobj.update(jsonb = newfeat)
+        fobj.update(geom_point = geowkt if ftype == 'Point' else None)
+        fobj.update(geom_line = geowkt if ftype == 'LineString' else None)
+        fobj.update(geom_poly = geowkt if ftype == 'Polygon' else None)
+        result = {"msg":"updated"+json.dumps(newfeat)}    
     except:
-        result = {"msg":"updating "+_id+' failed'}
+        result = {"msg":"updating "+str(_id)+' failed; '+sys.exc_info()}
     return JsonResponse(result,safe=False)
     
 @login_required    

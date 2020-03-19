@@ -450,7 +450,7 @@
 
   // updates json feature in drawnFeatures and db on EDITED
   function updateFeature(newfeat){
-    console.clear()
+    <!--console.clear()-->
     console.log('newfeat in js updateFeature()',newfeat)
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
@@ -557,14 +557,19 @@
     mappy.on(L.Draw.Event.EDITED, function (event) {
       e = event
       <!--console.log('event',e)-->
+      // layer leaflet_id clicked
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      console.log('layerid clicked',layerid)
-      // feature id of layer clicked
-      <!--fid = e.layers._layers[layerid].feature.geometry.fid-->
+      // associated feature id 
+      fid = e.layers._layers[layerid].feature.fid
+      console.log('layer:'+layerid+'; feature:'+fid)
 
-      <!--feat = idToFeature[fid].feature-->
-      <!--console.log('feat in EDITED')-->
+      // selected feature as initially rendered
+      feat = idToFeature[fid].feature
+      console.log('pre-EDITED feature',feat)
       <!--// {type:"Feature",properties:{},geometry:{fid:<int>,name:"",placetype:"",coordinates:[}}-->
+  
+      // 
+      newfeat = drawnLayers._layers[layerid].toGeoJSON()
 
       <!--ftype = feat.geometry.type-->
       <!--<!--console.log('ftype',ftype)-->-->
@@ -578,7 +583,7 @@
       <!--feat['geometry']['coordinates'] = parseCoords(ftype, lcoords)-->
 
       // update database copy
-      <!--updateFeature(newfeat)-->
+      updateFeature(newfeat)
       $(".leaflet-draw-draw-circlemarker").click()
     });
 
