@@ -8,7 +8,7 @@ from . import views
 # TODO: too much of a black box
 router = routers.DefaultRouter()
 
-router.register(r'geoms', views.GeomViewSet)
+router.register(r'geoms', views.FeatureViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

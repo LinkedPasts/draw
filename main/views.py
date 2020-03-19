@@ -123,7 +123,7 @@ def updateFeature(request):
     _id = feat['fid']
     name = feat['name']
     placetype = feat['properties']['type']
-    print('in updateFeature()', feat)
+    print('feat in updateFeature()', feat)
     # get existing 
     fobj = get_object_or_404(Feature, pk=_id)
     ftype = feat['type'] # Point, LineString, etc
@@ -149,7 +149,7 @@ def createFeature(request):
     print('mapid',mapid,type(mapid))
     if mapid > 0:
         feature = json.loads(request.POST['jsonb'])
-        placetype = feature['properties']['type']
+        placetype = feature['properties']['placetype']
         ftype = feature['geometry']['type']
         #gfield = 'geom_'+('point' if ftype=='Point' else 'line' if ftype=='LineString' else 'poly')
         # GEOSGeometry('MULTIPOLYGON((( 1 1, 1 2, 2 2, 1 1)))'))

@@ -7,16 +7,16 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
 
-from api.serializers import GeomSerializer, FeatureSerializer
+from api.serializers import FeatureSerializer
 
 #from accounts.permissions import IsOwnerOrReadOnly, IsOwner
-from main.models import Feature, Map, Project
+from main.models import Feature, Map
 
-# geometry for map
-class GeomViewSet(viewsets.ModelViewSet):
+# feature for map
+class FeatureViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
-    serializer_class = GeomSerializer
-    #serializer_class = FeatureSerializer
+    #serializer_class = GeomSerializer
+    serializer_class = FeatureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     
     def get_queryset(self):
@@ -35,15 +35,15 @@ class GeomViewSet(viewsets.ModelViewSet):
 
 # Linked Places record
 # not operational
-class LPViewSet(viewsets.ModelViewSet):
-    queryset = Feature.objects.all()
-    serializer_class = FeatureSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+#class LPViewSet(viewsets.ModelViewSet):
+    #queryset = Feature.objects.all()
+    #serializer_class = FeatureSerializer
+    #permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     
-    def get_queryset(self):
-        projid = self.request.GET.get('proj')
-        mapid = self.request.GET.get('mapid')
-        mapIds = Map.objects.values('id').filter(project = projid)
-        qs = Feature.objects.filter(id__in=mapIds)
-        #print('qs count',qs.count())
-        return qs
+    #def get_queryset(self):
+        #projid = self.request.GET.get('proj')
+        #mapid = self.request.GET.get('mapid')
+        #mapIds = Map.objects.values('id').filter(project = projid)
+        #qs = Feature.objects.filter(id__in=mapIds)
+        ##print('qs count',qs.count())
+        #return qs

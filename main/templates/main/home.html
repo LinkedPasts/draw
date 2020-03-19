@@ -276,24 +276,15 @@
       if(typeof(features)!=='undefined'){
         mappy.removeLayer(features)
       }
-      // TODO: style should depend on #features, zoom level
-      <!--function styler(type) {-->
-        <!--if (type == 'LineString')-->
-          <!--return {opacity: 1, weight:4 , color: "#fff"}-->
-        <!--else if (type == 'Point')-->
-          <!--return {radius: 2, fillOpacity: 0.8, opacity: 1, stroke: false, fillColor:"#ff0000"}-->
-        <!--else-->
-          <!--return {fillOpacity: 0.4, opacity: 1, color: "#fff", weight: 1, fillColor:"#993333"}-->
-      <!--}-->
-      idToFeature = {}  // for feature lookup
+      idToFeature = {}  // for layer lookup by fid
       
       features = L.geoJSON(geom, {
         <!--style: styler(geomtype),-->
         pointToLayer: function (feature, latlng) {
           <!--console.log('feature in renderMap()',feature)-->
           fid = feature.fid
-          name = feature.name
-          placetype = feature.placetype
+          name = feature.properties.name
+          placetype = feature.properties.placetype
           <!--console.log('matchid',matchid)-->
           marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
           idToFeature[fid] = marker
@@ -301,10 +292,10 @@
         }
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
-          console.log('f,l in renderMap()',f,l)
+          <!--console.log('f,l in renderMap()',f,l)-->
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
-          <!--l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.name+'<br/>'+'type: '+f.placetype);-->
+          l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.name+'<br/>'+'type: '+f.properties.placetype);
           identifier = feature.fid;
           if(feature.type == 'LineString'){
             layer.setStyle(styles.line_default)
@@ -413,7 +404,27 @@
       <p>Type: <input type="text" id="type_in" name="type" value=""> </p>\
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
       Save</button></p></form></div>';
-
+  function toWKT(layer) {
+      var lng, lat, coords = [];
+      if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+          var latlngs = layer.getLatLngs();
+          for (var i = 0; i < latlngs.length; i++) {
+              latlngs[i]
+              coords.push(latlngs[i].lng + " " + latlngs[i].lat);
+              if (i === 0) {
+                  lng = latlngs[i].lng;
+                  lat = latlngs[i].lat;
+              }
+      };
+          if (layer instanceof L.Polygon) {
+              return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
+          } else if (layer instanceof L.Polyline) {
+              return "LINESTRING(" + coords.join(",") + ")";
+          }
+      } else if (layer instanceof L.Marker) {
+          return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
+      }
+  }
   function popupEditForm(feat) {
     html = '<div><form id="popupeditform"><p>Name: <input type="text" id="name_in"  \
       name="name" value="'+feat['properties']['name']+'"></p> \
@@ -438,14 +449,14 @@
   }
 
   // updates json feature in drawnFeatures and db on EDITED
-  function updateFeature(feat){
+  function updateFeature(newfeat){
     console.clear()
-    console.log('feat in updateFeature()',feat)
+    console.log('newfeat in js updateFeature()',newfeat)
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
     formData.append('mapid', $("#map_select").val())
     formData.append('user','{{ user }}')
-    formData.append('jsonb', JSON.stringify(feat))
+    formData.append('jsonb', JSON.stringify(newfeat))
 
     $.ajax({
       type: 'POST',
@@ -468,9 +479,6 @@
     })
   }
   
-  <!--function parseCoords(lcoords):-->
-    
-    <!--return coords-->
   // create json feature in db
   function createFeature(feat){
     console.log('feat in createFeature()',feat)
@@ -519,6 +527,7 @@
 
       // make geojson immediately, add _leaflet_id
       feat = drawnlayer.toGeoJSON()
+      console.log('feat in CREATE',feat)
       feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
       drawnFeatures.push(feat)
       
@@ -531,13 +540,13 @@
         // console.log('last feature',findFeat(drawnlayer._leaflet_id));
         var feat = findFeat(drawnlayer._leaflet_id)
         var name = $("#name_in").val();
-        var type = $("#type_in").val();
+        var placetype = $("#type_in").val();
         feat['properties']['name'] = name;
-        feat['properties']['type'] = type;
+        feat['properties']['placetype'] = placetype;
         // console.log('props',feat['properties']);
         drawnlayer.unbindPopup()
         mappy.closePopup()        
-        drawnlayer.bindPopup('name: '+name+' type: '+type)
+        drawnlayer.bindPopup('name: '+name+' type: '+placetype)
 
         // ajax to write a Feature instance
         createFeature(feat)
@@ -547,24 +556,29 @@
 
     mappy.on(L.Draw.Event.EDITED, function (event) {
       e = event
-      console.log('event',e)
+      <!--console.log('event',e)-->
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      
+      console.log('layerid clicked',layerid)
       // feature id of layer clicked
-      fid = e.layers._layers[layerid].feature.geometry.fid
+      <!--fid = e.layers._layers[layerid].feature.geometry.fid-->
 
-      feat = idToFeature[fid].feature
-      // {type:"Feature",properties:{},geometry:{fid:<int>,name:"",placetype:"",coordinates:[}}
+      <!--feat = idToFeature[fid].feature-->
+      <!--console.log('feat in EDITED')-->
+      <!--// {type:"Feature",properties:{},geometry:{fid:<int>,name:"",placetype:"",coordinates:[}}-->
 
-      ftype = feat.geometry.type
-      console.log('ftype',ftype)
-      lcoords = ftype=='Point' ? e.layers._layers[layerid]._latlng : e.layers._layers[layerid]._latlngs
-
+      <!--ftype = feat.geometry.type-->
+      <!--<!--console.log('ftype',ftype)-->-->
+      <!--<!--lcoords=idToFeature[layerid].getLatLngs()-->-->
+      <!--<!--lcoords = ftype=='Point' ? idToFeature[fid].getLatLng() : idToFeature[fid].getLatLngs()-->-->
+      <!--wkt = toWKT(idToFeature[fid])-->
+      <!--newfeat = idToFeature[fid].toGeoJSON()-->
+      <!--console.log('newfeat',newfeat)-->
+      
       // update geometry from layer
-      <!--feat['geometry']['coordinates'] = parseCoords(lcoords)-->
+      <!--feat['geometry']['coordinates'] = parseCoords(ftype, lcoords)-->
 
       // update database copy
-      updateFeature(feat)
+      <!--updateFeature(newfeat)-->
       $(".leaflet-draw-draw-circlemarker").click()
     });
 
