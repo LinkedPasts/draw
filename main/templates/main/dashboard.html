@@ -1,0 +1,51 @@
+<!-- main/home.html -->
+{% extends "main/base.html" %}
+{% load leaflet_tags %}
+{% load fontawesome_5 %}
+{% load static %}
+{% block title %}<title>whg.draw</title>{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div id="dataset_list" class="mt-3">
+      <!--{# if messages %}-->
+      <!--<p>{# for message in messages %}{ message }}{# endfor %}</p>-->
+      <!--{# endif %}-->
+      <h4 class="mt-3">Projects
+        {{ referrer }}<span class="half"><a href="{% url 'main:project-create' %}" class="ml-5">
+          {% fa5_icon 'plus' 'fas' %} add new</a></span>
+      </h4>
+      <div class="list-box">
+        <!-- id, title, label, owner_id, create_date, uri-->
+        <table class="table table-striped">
+          <thead class="small">
+            <th>id</th>
+            <th>title</th>
+            <th>label</th>
+            <th>created (utc)</th>
+            <th>uri</th>
+            <th>owner</th>
+          </thead>
+          <tbody>
+            {% for p in project_list %}
+              <tr class="project-row">
+                <td>{{ p.id }}</td>
+                <td><a href="{% url 'main:project-detail' p.id %}" title="Project details" rel="tooltip"
+                  >{{ p.title }}</a></td>
+                <td>{{ p.label }}</td>
+                <td class="small">{{ p.create_date|date:"d M Y, H:i" }}</td>
+                <td>{{ p.datatype }}</td>
+                <td>{{ p.uri }}</span></td>
+                <td>{{ p.owner_id }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div> <!-- container -->  
+<script type="text/javascript">
+
+</script>
+{% endblock %}

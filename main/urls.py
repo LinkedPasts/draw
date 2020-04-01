@@ -13,8 +13,19 @@ urlpatterns = [
         template_name="main/home.html")),name="home"),
 
     path('fetch_projects/', views.fetchProjects, name='fetch-projects'),
+    
     path('feature_create/', views.createFeature, name='feature-create'),
     path('feature_delete/', views.deleteFeature, name='feature-delete'),
     path('feature_update/', views.updateFeature, name='feature-update'),
+
+    path('project_create/', views.ProjectCreateView.as_view(), name='project-create'),
+    path('project_delete/<int:id>', views.ProjectDeleteView.as_view(), name='project-delete'),
+    path('project_detail/<int:id>', views.ProjectDetailView.as_view(), name='project-detail'),
+
+    path('map_create/', views.MapCreateView.as_view(), name='map-create'),
+    path('map_delete/<int:id>', views.MapDeleteView.as_view(), name='map-delete'),
+    path('map_detail/<int:id>', views.MapDetailView.as_view(), name='map-detail'),
+    
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 ]
 # + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

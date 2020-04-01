@@ -1,10 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-#from django.contrib import auth, messages
 from django.contrib.gis.geos import GEOSGeometry
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import (CreateView, DeleteView, ListView)
+from django.urls import reverse
+from django.views.generic import (CreateView, DeleteView, ListView, UpdateView)
 
 import json, sys
 from .utils import myprojects
@@ -12,8 +13,8 @@ from .models import Project, Map, Feature
 from .forms import ProjectCreateModelForm, MapCreateModelForm
 
 class DashboardView(LoginRequiredMixin, ListView):
-    context_object_name = 'dataset_list'
-    template_name = 'datasets/dashboard.html'
+    context_object_name = 'project_list'
+    template_name = 'main/dashboard.html'
 
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
@@ -33,12 +34,12 @@ class DashboardView(LoginRequiredMixin, ListView):
         context = super(DashboardView, self).get_context_data(*args, **kwargs)
         print('in get_context',me)
 
-        types_ok=['ccodes','copied','drawn']
+        #types_ok=['ccodes','copied','drawn']
         # list areas
-        userareas = Area.objects.all().filter(type__in=types_ok).order_by('created')
-        context['area_list'] = userareas if me.username == 'whgadmin' else userareas.filter(owner=self.request.user)
+        #userareas = Area.objects.all().filter(type__in=types_ok).order_by('created')
+        #context['area_list'] = userareas if me.username == 'whgadmin' else userareas.filter(owner=self.request.user)
 
-        context['viewable'] = ['uploaded','inserted','reconciling','review_hits','reviewed','review_whg','indexed']
+        #context['viewable'] = ['uploaded','inserted','reconciling','review_hits','reviewed','review_whg','indexed']
         # TODO: user place collections
         #print('DashboardView context:', context)
         return context
@@ -51,13 +52,21 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
 
-class MapCreateView(LoginRequiredMixin, CreateView):
-    form_class = MapCreateModelForm
-    template_name = 'main/map_create.html'
-    success_message = 'map created'
-
+class ProjectDetailView(LoginRequiredMixin, UpdateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
+
+    #form_class = ProjectDetailModelForm
+    template_name = 'main/project.html'
+
+    def get_success_url(self):
+        id_ = self.kwargs.get("id")
+        print('messages:', messages.get_messages(self.kwargs))
+        return '/projects/'+str(id_)+'/detail'
+
+    # Dataset has been edited, form submitted
+    def form_valid(self, form):
+        print('foo')
 
 
 class ProjectDeleteView(DeleteView):
@@ -70,6 +79,14 @@ class ProjectDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('home')
 
+class MapCreateView(LoginRequiredMixin, CreateView):
+    form_class = MapCreateModelForm
+    template_name = 'main/map_create.html'
+    success_message = 'map created'
+
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+
 class MapDeleteView(DeleteView):
     template_name = 'main/map_delete.html'
 
@@ -80,6 +97,21 @@ class MapDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('home')
 
+class MapDetailView(LoginRequiredMixin, UpdateView):
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+
+    #form_class = ProjectDetailModelForm
+    template_name = 'main/map.html'
+
+    def get_success_url(self):
+        id_ = self.kwargs.get("id")
+        print('messages:', messages.get_messages(self.kwargs))
+        #return '/projects/'+str(id_)+'/detail'
+
+    # Dataset has been edited, form submitted
+    def form_valid(self, form):
+        print('foo')
 
 
 @login_required
