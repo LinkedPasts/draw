@@ -8,6 +8,10 @@
 <div class="container mt-2">
     <div id="content">
     <h4 class="text-warning">create map</h4>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,21 @@
+<!-- main/project.html -->
+{% extends "main/base.html" %}
+{% load leaflet_tags %}
+{% load static %}
+{% block title %}<title>whg.draw</title>{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="pt-3">
+    <h4 class="text-warning">update map</h4>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Update">
+    </form>
+  </div>
+</div>
+<script type="text/javascript">
+
+</script>
+{% endblock %}

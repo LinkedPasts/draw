@@ -13,29 +13,30 @@
       <!--<p>{# for message in messages %}{ message }}{# endfor %}</p>-->
       <!--{# endif %}-->
       <h4 class="mt-3">Projects
-        {{ referrer }}<span class="half"><a href="{% url 'main:project-create' %}" class="ml-5">
-          {% fa5_icon 'plus' 'fas' %} add new</a></span>
+        {{ referrer }}<small class="half"><a href="{% url 'main:project-create' %}" class="ml-5">
+          {% fa5_icon 'plus' 'fas' %} add new</a></small>
       </h4>
       <div class="list-box">
         <!-- id, title, label, owner_id, create_date, uri-->
         <table class="table table-striped">
           <thead class="small">
+            <th></th>
             <th>id</th>
             <th>title</th>
             <th>label</th>
             <th>created (utc)</th>
-            <th>uri</th>
+            <th>url</th>
             <th>owner</th>
           </thead>
           <tbody>
             {% for p in project_list %}
               <tr class="project-row">
+                <td><a href="{% url 'main:project-delete' p.id %}">{% fa5_icon 'trash-alt' 'fas' %}</a></td>
                 <td>{{ p.id }}</td>
-                <td><a href="{% url 'main:project-detail' p.id %}" title="Project details" rel="tooltip"
-                  >{{ p.title }}</a></td>
+                <td><a href="{% url 'main:project-update' p.id %}" title="Update project" rel="tooltip"
+                  > {{ p.title }} </a></td>
                 <td>{{ p.label }}</td>
                 <td class="small">{{ p.create_date|date:"d M Y, H:i" }}</td>
-                <td>{{ p.datatype }}</td>
                 <td>{{ p.uri }}</span></td>
                 <td>{{ p.owner_id }}</td>
               </tr>

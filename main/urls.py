@@ -20,11 +20,11 @@ urlpatterns = [
 
     path('project_create/', views.ProjectCreateView.as_view(), name='project-create'),
     path('project_delete/<int:id>', views.ProjectDeleteView.as_view(), name='project-delete'),
-    path('project_detail/<int:id>', views.ProjectDetailView.as_view(), name='project-detail'),
+    path('project_update/<int:pk>', views.ProjectUpdateView.as_view(), name='project-update'),
 
-    path('map_create/', views.MapCreateView.as_view(), name='map-create'),
+    path('map_create/<int:pid>', views.MapCreateView.as_view(), name='map-create'),
     path('map_delete/<int:id>', views.MapDeleteView.as_view(), name='map-delete'),
-    path('map_detail/<int:id>', views.MapDetailView.as_view(), name='map-detail'),
+    path('map_update/<int:id>', views.MapUpdateView.as_view(), name='map-update'),
     
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 ]

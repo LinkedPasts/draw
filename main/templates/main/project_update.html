@@ -1,0 +1,35 @@
+<!-- main/project.html -->
+{% extends "main/base.html" %}
+{% load leaflet_tags %}
+{% load fontawesome_5 %}
+{% load static %}
+{% block title %}<title>whg.draw</title>{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h4 class="text-warning mt-3">project detail</h4>
+  {{ context }}
+  <div class="row">
+    <div class="pt-3 col-sm-6">
+      <form method="post">{% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" value="Update">
+          <span class="ml-2"><a href="javascript:history.back()">Cancel</a></span>
+      </form>
+    </div>
+    <div class="col-sm-6">
+    <h5>Maps <small><a href="{% url 'main:map-create' project_id %}" class="ml-5">
+          {% fa5_icon 'plus' 'fas' %} add new</a></small></h5>
+    <ul>
+      {% for m in maps %}
+        <li><a href="#">{{m.title}}</a> ({{m.label}})</li>
+      {% endfor %}
+    </ul>
+    <div>
+  </div>
+</div>
+<script type="text/javascript">
+
+</script>
+{% endblock %}

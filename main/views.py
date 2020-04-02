@@ -9,8 +9,8 @@ from django.views.generic import (CreateView, DeleteView, ListView, UpdateView)
 
 import json, sys
 from .utils import myprojects
-from .models import Project, Map, Feature
-from .forms import ProjectCreateModelForm, MapCreateModelForm
+from main.models import Project, Map, Feature
+from main.forms import ProjectCreateModelForm, MapCreateModelForm
 
 class DashboardView(LoginRequiredMixin, ListView):
     context_object_name = 'project_list'
@@ -48,26 +48,31 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     form_class = ProjectCreateModelForm
     template_name = 'main/project_create.html'
     success_message = 'project created'
+    success_url="/home/dashboard/"
 
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
 
-class ProjectDetailView(LoginRequiredMixin, UpdateView):
+class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
+    success_url="/home/dashboard/"
 
     #form_class = ProjectDetailModelForm
-    template_name = 'main/project.html'
-
-    def get_success_url(self):
-        id_ = self.kwargs.get("id")
-        print('messages:', messages.get_messages(self.kwargs))
-        return '/projects/'+str(id_)+'/detail'
-
-    # Dataset has been edited, form submitted
-    def form_valid(self, form):
-        print('foo')
-
+    template_name = 'main/project_update.html'
+    model = Project
+    fields = ['id', 'title', 'label', 'owner', 'uri']
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super(ProjectUpdateView, self).get_context_data(*args, **kwargs)
+        print('ProjectUpdateView get_context_data() kwargs:',self.kwargs)
+        id_ = self.kwargs.get("pk")
+        proj = get_object_or_404(Project, id=id_)
+        maps = Map.objects.all().filter(project=proj).order_by('-create_date')
+        
+        context['maps'] = maps
+        context['project_id'] = id_
+        return context
 
 class ProjectDeleteView(DeleteView):
     template_name = 'main/project_delete.html'
@@ -77,15 +82,18 @@ class ProjectDeleteView(DeleteView):
         return get_object_or_404(Project, id=id_)
 
     def get_success_url(self):
-        return reverse('home')
+        return reverse('main:dashboard')
+    
 
 class MapCreateView(LoginRequiredMixin, CreateView):
     form_class = MapCreateModelForm
     template_name = 'main/map_create.html'
     success_message = 'map created'
-
+    success_url="/home/dashboard/"
+    
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
+    
 
 class MapDeleteView(DeleteView):
     template_name = 'main/map_delete.html'
@@ -97,12 +105,14 @@ class MapDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('home')
 
-class MapDetailView(LoginRequiredMixin, UpdateView):
+class MapUpdateView(LoginRequiredMixin, UpdateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
 
+    model = Project
     #form_class = ProjectDetailModelForm
-    template_name = 'main/map.html'
+    template_name = 'main/map_update.html'
+    fields = ['id', 'project', 'title', 'label', 'owner', 'cite_text', 'cite_uri']
 
     def get_success_url(self):
         id_ = self.kwargs.get("id")
@@ -112,7 +122,6 @@ class MapDetailView(LoginRequiredMixin, UpdateView):
     # Dataset has been edited, form submitted
     def form_valid(self, form):
         print('foo')
-
 
 @login_required
 def fetchProjects(request):
