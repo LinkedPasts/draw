@@ -183,7 +183,7 @@
       $.each(data.projects, function (i, p) {
         <!--console.log('proj',p)-->
         $(project_select).append($('<option>', { 
-            value: p.id,
+            value: p.label,
             text : p.title 
         }));
       });
@@ -191,13 +191,18 @@
     
     // populate map_select
     project_select.on('change',function(){
-      projid = parseInt($(this).val())
-      <!--console.log('proj #'+projid)-->
+      <!--projid = parseInt($(this).val())-->
+      proj = $(this).val()
+      console.log('proj: '+proj)
       clearMap()
       // clear options
       $(map_select).html('')
       // write select options to dom, display map_select dropdown 
-      maps = [projdata['maps'].find( ({ project }) => project === projid )]
+      <!--maps = [projdata.maps.find( ({ project }) => project === projid )]-->
+      maps = projdata.maps.filter(function (el) {
+        <!--return el.project == projid;-->
+        return el.proj_label == proj;
+      });
       <!--console.log('maps',maps)-->
       <!--items = projdata['maps']-->
       $(map_select).append('<option value="0">Select a map</option>')
@@ -205,7 +210,7 @@
         <!--console.log('map',map)-->
         $(map_select).append($('<option>', { 
             value: map.id,
-            text : map.title 
+            text : map.label 
         }));
       });
       div_map_select.show(400)
@@ -220,24 +225,42 @@
       $("#slider").removeClass('hidden')
       clearMap()
       mapid = parseInt($(this).val())
-      <!--console.log('load map #'+mapid)-->
+      console.log('load map #'+mapid)
       if (mapid != 0) {
-        mapdict = maps.find( ({ id }) => id === mapid )
-        layer = eval(mapdict['label'])
-        var extent = layer.options.mapExtent
-        var bounds = new L.LatLngBounds(
-          new L.LatLng(extent[1], extent[0]),
-          new L.LatLng(extent[3], extent[2]));
-        <!--mappy.setView(L.latLng(map['center'][0],map['center'][1]),map['zoom'])-->
-        mappy.addLayer(layer)
-        'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
-        <!--console.log('now run loadGeodata() for map #'+mapid)-->
+        map = maps.find( ({ id }) => id === mapid )
+        
+        opt={'proj':map.proj_label,'map':map.label,'extent':map.bounds,
+        'minzoom':map.minzoom,'maxzoom':map.maxzoom,'zoom':map.minzoom}
+        console.log('opt',opt)
+        addLayer(opt)
+        <!--layer = eval(mapdict.label)-->
+        <!--console.log('mapdict, layer',mapdict,layer)-->
+        <!--var extent = layer.options.mapExtent-->
+        <!--var bounds = new L.LatLngBounds(-->
+          <!--new L.LatLng(extent[1], extent[0]),-->
+          <!--new L.LatLng(extent[3], extent[2]));-->
+        <!--mappy.addLayer(layer)-->
+        <!--'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)-->
+
       }
-      loadGeodata(mapdict['project'],mapid)
+      <!--loadGeodata(mapdict['project'],mapid)-->
+      loadGeodata(map.proj_id,mapid)
     })
     
   })
-  
+  <!--opt={'proj':'bregel','map':'bregel32','extent':[39.4561, 28.7050, 103.3968, 60.4308],-->
+        <!--'minzoom':4,'maxzoom':10,'zoom':4}-->
+  function addLayer(opt){
+    url = `http://localhost:8181/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;
+    layer = L.tileLayer(url,{'mapExtent':opt.extent,'minZoom':opt.minzoom,
+      'maxZoom':opt.maxzoom, 'zoom':opt.zoom, 'pane':'tilelayers'});
+    var extent = layer.options.mapExtent
+    var bounds = new L.LatLngBounds(
+      new L.LatLng(extent[1], extent[0]),
+      new L.LatLng(extent[3], extent[2]));
+    mappy.addLayer(layer)
+    'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
+  }
   styles = {
     'marker_default': {
       fillColor: "#ff0000",
@@ -369,7 +392,7 @@
       osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:mb_token, attribution:attrib_mb}),
       awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc})
 
-      B32 = L.tileLayer('http://localhost:8181/bregel/32/{z}/{x}/{y}.png',{
+      B32 = L.tileLayer('http://localhost:8181/bregel/bregel32/{z}/{x}/{y}.png',{
         'mapExtent':[39.45611030, 28.70507522, 103.39688562, 60.43081427],
         'minZoom':4, 'maxZoom':10, 'zoom': 4, 'pane':'tilelayers'
       });
@@ -391,8 +414,6 @@
       "Satellite": satellite
     };
     var overlays = {
-      <!--"Bregel (32)": B32,-->
-      <!--"Arrowsmith": arrowsmith1810,-->
       "Drawn features": drawnLayers
     }
 

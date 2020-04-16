@@ -27,9 +27,16 @@ class Map(models.Model):
 
     title = models.CharField(max_length=255)
     label = models.CharField(max_length=20)
+    year = models.IntegerField(null=True)
     cite_uri = models.URLField(null=True)
     cite_text = models.CharField(max_length=2044, null=False)
-    create_date = models.DateTimeField(null=True, auto_now_add=True)
+    create_date = models.DateTimeField(auto_now_add=True)
+    tiles = models.BooleanField(default=False)
+    
+    # values 
+    minzoom = models.CharField(max_length=2,null=True)
+    maxzoom = models.CharField(max_length=2,null=True)
+    bounds = ArrayField(models.DecimalField(decimal_places=8,max_digits=11),null=True)
 
     class Meta:
         managed = True

@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('map_create/<int:pid>', views.MapCreateView.as_view(), name='map-create'),
     path('map_delete/<int:id>', views.MapDeleteView.as_view(), name='map-delete'),
-    path('map_update/<int:id>', views.MapUpdateView.as_view(), name='map-update'),
+    path('map_update/<int:pk>', views.MapUpdateView.as_view(), name='map-update'),
     
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 ]

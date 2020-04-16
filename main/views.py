@@ -109,10 +109,11 @@ class MapUpdateView(LoginRequiredMixin, UpdateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
 
-    model = Project
+    model = Map
     #form_class = ProjectDetailModelForm
     template_name = 'main/map_update.html'
-    fields = ['id', 'project', 'title', 'label', 'owner', 'cite_text', 'cite_uri']
+    fields = ['id', 'project', 'title', 'label', 'owner', 'cite_text', 'cite_uri',
+              'minzoom','maxzoom','bounds']
 
     def get_success_url(self):
         id_ = self.kwargs.get("id")
@@ -128,15 +129,16 @@ def fetchProjects(request):
     print('in fetchProject()', request.GET)
     result = {"projects":[], "maps":[]}
     projects = Project.objects.all()
-    maps = Map.objects.all()
+    maps = Map.objects.filter(tiles=True)
     for p in projects:
         result['projects'].append(
             {'id':p.id, 'owner':p.owner_id, 'label':p.label, 'title':p.title}
         )
     for m in maps:
         result['maps'].append(
-            {'id':m.id, 'project':m.project_id, 'label':m.label, 
-             'title':m.title, 'cite_uri':m.cite_uri, 'cite_text':m.cite_text}
+            {'id':m.id, 'proj_id':m.project_id, 'proj_label':m.project.label, 'label':m.label, 
+             'title':m.title, 'cite_uri':m.cite_uri, 'cite_text':m.cite_text, 
+             'minzoom':m.minzoom, 'maxzoom':m.maxzoom, 'bounds':m.bounds}
         )
     
     return JsonResponse(result,safe=False)

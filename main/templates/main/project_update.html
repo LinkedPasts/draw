@@ -23,7 +23,7 @@
           {% fa5_icon 'plus' 'fas' %} add new</a></small></h5>
     <ul>
       {% for m in maps %}
-        <li><a href="#">{{m.title}}</a> ({{m.label}})</li>
+        <li><a href="{% url 'main:map-update' m.id %}">{{m.title}}</a> ({{m.label}})</li>
       {% endfor %}
     </ul>
     <div>
