@@ -4,6 +4,7 @@ _scratch/
 media/
 
 .DS_Store
+*.wp*
 
 ### Django ###
 *.log
