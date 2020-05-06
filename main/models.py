@@ -15,6 +15,9 @@ class Project(models.Model):
     uri = models.URLField(blank=True, null=True)
     create_date = models.DateTimeField(null=True, auto_now_add=True)
 
+    def __str__(self):
+        return self.label
+    
     class Meta:
         managed = True
         db_table = 'projects'    
@@ -37,6 +40,9 @@ class Map(models.Model):
     minzoom = models.CharField(max_length=2,null=True)
     maxzoom = models.CharField(max_length=2,null=True)
     bounds = ArrayField(models.DecimalField(decimal_places=8,max_digits=11),null=True)
+
+    def __str__(self):
+        return self.label
 
     class Meta:
         managed = True

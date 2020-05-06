@@ -10,7 +10,7 @@ from . import views
 app_name='main'
 urlpatterns = [
     path(r'', login_required(TemplateView.as_view(
-        template_name="main/home.html")),name="home"),
+        template_name="main/home.html")), name="home"),
 
     path('fetch_projects/', views.fetchProjects, name='fetch-projects'),
     

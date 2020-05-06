@@ -8,6 +8,7 @@ from main import views
 
 urlpatterns = [
     path(r'', TemplateView.as_view(template_name="main/index.html"), name="index"),
+    
     path('home/', include('main.urls')),
 
     path('create_project/', views.ProjectCreateView.as_view(), name='project-create'),

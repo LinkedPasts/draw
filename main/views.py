@@ -68,7 +68,7 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
         print('ProjectUpdateView get_context_data() kwargs:',self.kwargs)
         id_ = self.kwargs.get("pk")
         proj = get_object_or_404(Project, id=id_)
-        maps = Map.objects.all().filter(project=proj).order_by('-create_date')
+        maps = Map.objects.all().filter(project=proj,tiles=True).order_by('-create_date')
         
         context['maps'] = maps
         context['project_id'] = id_
@@ -108,21 +108,26 @@ class MapDeleteView(DeleteView):
 class MapUpdateView(LoginRequiredMixin, UpdateView):
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
+    #success_url='/home/project_update/'+str(proj_id)
 
     model = Map
-    #form_class = ProjectDetailModelForm
     template_name = 'main/map_update.html'
     fields = ['id', 'project', 'title', 'label', 'owner', 'cite_text', 'cite_uri',
               'minzoom','maxzoom','bounds']
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super(MapUpdateView, self).get_context_data(*args, **kwargs)
+        id_ = self.kwargs.get("pk")
+        proj_id = get_object_or_404(Map,pk=id_).project_id
+        
+        context['map_id'] = id_
+        context['project_id'] = proj_id
+        return context
 
-    def get_success_url(self):
-        id_ = self.kwargs.get("id")
-        print('messages:', messages.get_messages(self.kwargs))
-        #return '/projects/'+str(id_)+'/detail'
-
-    # Dataset has been edited, form submitted
-    def form_valid(self, form):
-        print('foo')
+    def get_success_url(self, *args, **kwargs):
+        proj_id=get_object_or_404(Map,pk=self.kwargs.get("pk")).project_id
+        print('get_success_url; proj_id',proj_id)        
+        return '/home/project_update/'+str(proj_id)
 
 @login_required
 def fetchProjects(request):
