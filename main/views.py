@@ -2,16 +2,31 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.geos import GEOSGeometry
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.views.generic import (CreateView, DeleteView, ListView, UpdateView)
+from django.views.generic import (View, CreateView, DeleteView, ListView, UpdateView)
 
 import json, sys
 from .utils import myprojects
 from main.models import Project, Map, Feature
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
 
+class DrawView(LoginRequiredMixin, View):
+    #template_name = 'main/draw.html'
+    
+    def get(self, request, *args, **kwargs):
+        context = {'projid': self.kwargs['projid']}
+        return render(request, 'main/draw.html', context)
+    
+    # kwargs = {'projid':<n>}
+    #def get_context_data(self, *args, **kwargs):
+        #context = super(DrawView, self).get_context_data(*args, **kwargs)
+        
+        #context['projid'] = self.kwargs['projid']
+        #return context
+
+    
 class DashboardView(LoginRequiredMixin, ListView):
     context_object_name = 'project_list'
     template_name = 'main/dashboard.html'

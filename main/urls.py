@@ -11,7 +11,7 @@ app_name='main'
 urlpatterns = [
     path(r'', login_required(TemplateView.as_view(
         template_name="main/draw.html")), name="draw"),
-
+    path('<int:projid>/', views.DrawView.as_view(), name='draw'),
     path('fetch_projects/', views.fetchProjects, name='fetch-projects'),
     
     path('feature_create/', views.createFeature, name='feature-create'),
