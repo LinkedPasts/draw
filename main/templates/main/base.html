@@ -42,7 +42,7 @@
     <!--<nav class="navbar navbar-expand-lg navbar-light">-->
     <nav class="navbar navbar-expand navbar-light">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'main:home' %}">linkedplaces.draw</a>
+        <a class="navbar-brand" href="{% url 'main:draw' %}">linkedplaces.draw</a>
 		  <div class="small">
         <span id="beta_badge" class="badge badge-warning mr-2">ALPHA 0.1</span>
       </div>
@@ -50,7 +50,7 @@
           <div class="navbar-nav ml-auto pt-2">
 			{% if user.is_authenticated %}
 			  <li class="nav-item">
-				<a class="nav-link" href="{% url 'main:dashboard' %}">Dashboard</a>
+				<a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
 			  </li>
 			  <li class="nav-item larger">
 				<a class="nav-link" rel="tooltip" title="{{ user }} settings"

@@ -19,11 +19,11 @@
       </form>
     </div>
     <div class="col-sm-6">
-    <h5>Maps <small><a href="{% url 'main:map-create' project_id %}" class="ml-5">
+    <h5>Maps <small><a href="{% url 'map-create' project_id %}" class="ml-5">
           {% fa5_icon 'plus' 'fas' %} add new</a></small></h5>
     <ul>
       {% for m in maps %}
-        <li><a href="{% url 'main:map-update' m.id %}">{{m.title}}</a> ({{m.label}})</li>
+        <li><a href="{% url 'map-update' m.id %}">{{m.title}}</a> ({{m.label}})</li>
       {% endfor %}
     </ul>
     <div>

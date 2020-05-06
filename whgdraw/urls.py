@@ -8,19 +8,27 @@ from main import views
 
 urlpatterns = [
     path(r'', TemplateView.as_view(template_name="main/index.html"), name="index"),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('draw/', include('main.urls')),
     
-    path('home/', include('main.urls')),
+    path('project_create/', views.ProjectCreateView.as_view(), name='project-create'),
+    path('project_delete/<int:id>', views.ProjectDeleteView.as_view(), name='project-delete'),
+    path('project_update/<int:pk>', views.ProjectUpdateView.as_view(), name='project-update'),
 
-    path('create_project/', views.ProjectCreateView.as_view(), name='project-create'),
-    path('create_map/', views.MapCreateView.as_view(), name='map-create'),
-
-    path('delete_project/', views.ProjectDeleteView.as_view(), name='project-delete'),
-    path('delete_map/', views.MapDeleteView.as_view(), name='map-delete'),
+    path('map_create/<int:pid>', views.MapCreateView.as_view(), name='map-create'),
+    path('map_delete/<int:id>', views.MapDeleteView.as_view(), name='map-delete'),
+    path('map_update/<int:pk>', views.MapUpdateView.as_view(), name='map-update'),    
     
-    #path('home/fetch_projects/', views.fetchProjects, name='fetch-projects'),
-    #path('home/feature_create/', views.createFeature, name='feature-create'),
     path('api/', include('api.urls')),
     path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls)
 ]
 # + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+
+
+#path('create_project/', views.ProjectCreateView.as_view(), name='project-create'),
+#path('create_map/', views.MapCreateView.as_view(), name='map-create'),
+
+#path('delete_project/', views.ProjectDeleteView.as_view(), name='project-delete'),
+#path('delete_map/', views.MapDeleteView.as_view(), name='map-delete'),
+
