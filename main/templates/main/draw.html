@@ -7,6 +7,7 @@
   {% load static %}
   {% leaflet_js %}
   {% leaflet_css %}
+  <!--<link rel="stylesheet" href="{ static 'css/styles.css' }"/>-->
   <script src="{% static 'js/FileSaver.min.js' %}"></script>
   <script src="{% static 'js/leaflet-draw/Leaflet.draw.js' %}"></script>
   <script src="{% static 'js/leaflet-draw/Leaflet.Draw.Event.js' %}"></script>
@@ -46,22 +47,6 @@
   <script src="{% static 'js/leaflet-draw/edit/handler/Edit.Circle.js' %}"></script>
 
   <script src="{% static 'js/leaflet.ajax.min.js' %}"></script>
-  <style>
-    #map {
-      position:relative; top:0; bottom:0; left:0; height:calc(90vh);
-      width: calc(100% - 200px); z-index: 1000; background:aliceblue;
-    }
-    #map_home.leaflet-container {height:100%;)}
-    #slider{ position: absolute; top: 25px; right: 70px; z-index: 400; }
-
-    #sidebar { position:relative; right:0; top:0; overflow-x: hidden; overflow-y: auto;
-      padding: 8px; z-index: 1450; background: #f8f8f8; width:200px;}
-    .metadata {position: absolute; background:ivory; bottom:0; height:130px;
-      margin-left:-8px; font-size:smaller; width: 100%; padding: 8px;
-      border-top: 1px solid #ddd;}
-    .table-sm {font-size: .8rem;}
-    .sectionheader {font-size: .6rem; color: #993333;}
-  </style>
 {% endblock %}
 {% block content %}
 <div class="container mt-2">
@@ -82,58 +67,75 @@
           </select>
       </div>
       <hr/>
-      <div class="stats">
-        <div class="divheader"><h5>Stats <span class="smaller"><a href="#">refresh</a></span></h5></div>
-        <div class="sectionheader">TO DATE</div>
-        <table class="table table-striped table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>type</th>
-              <th>count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>settlement</td>
-              <td>452</td>
-            </tr>
-            <tr>
-              <td>province</td>
-              <td>35</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="sectionheader">THIS SESSION</div>
-        <table class="table table-striped table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>type</th>
-              <th>count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>settlement</td>
-              <td>12</td>
-            </tr>
-            <tr>
-              <td>province</td>
-              <td>0</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <hr/>
-      <div class="options" align="center">
-        <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
+      <!-- tabs here -->
+      <ul id="draw_tabs_ul" class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link p-2 active" href="#tab_bench">Workbench</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link p-2" href="#tab_stats">Stats</a>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="tab_bench" role="tabpanel">
+<div id="r1" class="radio">
+  <label><input type="radio" name="ftype" value="[300008347]" checked> settlement</label>
+</div>
+<div id="r2" class="radio">
+  <label><input type="radio" name="ftype" value="[300008347,300000810]"> settlement/arch site</label>
+</div>
+<div id="r3" class="radio">
+  <label><input type="radio" name="ftype" value="[300387178]"> region</label>
+</div>
+        </div>
+        <div class="tab-pane fade" id="tab_stats" role="tabpanel">
+          <div class="sectionheader">TO DATE</div>
+          <table class="table table-striped table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>type</th>
+                <th>count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>settlement</td>
+                <td>452</td>
+              </tr>
+              <tr>
+                <td>province</td>
+                <td>35</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sectionheader">THIS SESSION</div>
+          <table class="table table-striped table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>type</th>
+                <th>count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>settlement</td>
+                <td>12</td>
+              </tr>
+              <tr>
+                <td>province</td>
+                <td>0</td>
+              </tr>
+            </tbody>
+          </table>        
+          </div>
+        </div>
+        <hr/>
+        <div class="options" align="center">
+          <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
             Download {% fa5_icon 'file-download' 'fas' %}</button>
-        <!--<button id="btn_save" type="button" class="btn btn-primary btn-sm">-->
-            <!--Save</button>-->
+        </div>      
       </div>
-      <!-- <div class="metadata">
-        <p>(Composite Map) Map Exhibiting the Great Post Roads, Physical and Political Divisions of Europe from Original Materials Collected from the Different Countries Delineated by A. Arrowsmith MDCCCX. London Published 2nd. Jany. 1810, by A. Arrowsmith No. 10 Soho Square, Hydrographer to H.R.H. The Prince of Wales. </p>
-      </div> -->
-    </div>
+    </div> <!-- sidebar -->
   </div>
 </div>
 
@@ -150,7 +152,7 @@
     <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
-        console.log('loadGeodata() data',data)
+        <!--console.log('loadGeodata() data',data)-->
         geom = {  "type":"FeatureCollection",
                   "features":[],
                   "properties":{"counts":get_counts(data.results)}}
@@ -175,7 +177,11 @@
     project_select = $("#project_select")
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
-    
+
+    $('#draw_tabs_ul a').on('click', function (e) {
+      e.preventDefault()
+      $(this).tab('show')
+    })    
     // get project and map records
     $.ajax({ url: '/draw/fetch_projects/' }).done(function(data){
       <!--console.log('projects & maps',data)-->
@@ -189,22 +195,19 @@
       });
     })
     
-    // populate map_select
+    // choose project from dropdown
     project_select.on('change',function(){
       <!--projid = parseInt($(this).val())-->
       proj = $(this).val()
-      console.log('proj: '+proj)
+      <!--console.log('proj: '+proj)-->
       clearMap()
       // clear options
       $(map_select).html('')
       // write select options to dom, display map_select dropdown 
-      <!--maps = [projdata.maps.find( ({ project }) => project === projid )]-->
       maps = projdata.maps.filter(function (el) {
-        <!--return el.project == projid;-->
         return el.proj_label == proj;
       });
       <!--console.log('maps',maps)-->
-      <!--items = projdata['maps']-->
       $(map_select).append('<option value="0">Select a map</option>')
       $.each(maps, function (i, map) {
         <!--console.log('map',map)-->
@@ -231,19 +234,9 @@
         
         opt={'proj':map.proj_label,'map':map.label,'extent':map.bounds,
         'minzoom':map.minzoom,'maxzoom':map.maxzoom,'zoom':map.minzoom}
-        console.log('opt',opt)
+        <!--console.log('opt',opt)-->
         addLayer(opt)
-        <!--layer = eval(mapdict.label)-->
-        <!--console.log('mapdict, layer',mapdict,layer)-->
-        <!--var extent = layer.options.mapExtent-->
-        <!--var bounds = new L.LatLngBounds(-->
-          <!--new L.LatLng(extent[1], extent[0]),-->
-          <!--new L.LatLng(extent[3], extent[2]));-->
-        <!--mappy.addLayer(layer)-->
-        <!--'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)-->
-
       }
-      <!--loadGeodata(mapdict['project'],mapid)-->
       loadGeodata(map.proj_id,mapid)
     })
     
@@ -291,9 +284,9 @@
 
   function renderMap(geom){
     <!--console.log('dslabel, geom in renderMap()',screen,geom)-->
-    console.log('renderMap() geom',geom)
+    <!--console.log('renderMap() geom',geom)-->
     if (geom.features.length==0) {
-      console.log('no features yet')
+      <!--console.log('no features yet')-->
       <!--spinner.stop()-->
     } else {
       geomtype = geom.features[0]['type']
@@ -382,24 +375,19 @@
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       attrib_awmc = 'Tiles and Data &copy; 2013 <a href="http://www.awmc.unc.edu" target="_blank">AWMC</a>',
-      mb_awmc = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiY2prcmgwc2cwMjRuZzNsdGhzZmVuMDRqbCJ9.MeLsyeOqwhTRdvt_Hgo7kg',
-
       // mapbox
-      mb_token = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+      token_mb = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+      token_kg = 'pk.eyJ1Ijoia2dlb2dyYXBoZXIiLCJhIjoiUmVralBPcyJ9.mJegAI1R6KR21x_CVVTlqw',
       mbtiles_url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}',
+      mbstyle_url = 'https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={token}';
 
-      satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb}),
-      osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:mb_token, attribution:attrib_mb}),
-      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:mb_awmc, attribution:attrib_awmc})
+      // mapbox layers
+    var satellite  = L.tileLayer(mbstyle_url, {id:'mapbox/satellite-streets-v11', token:token_mb, attribution:attrib_mb})
+      osm  = L.tileLayer(mbstyle_url, {id:'mapbox/light-v10', token:token_mb, attribution:attrib_mb}),
+      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_kg, attribution:attrib_awmc});
+      <!--satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb});-->
+      <!--osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:mb_token, attribution:attrib_mb}),-->
 
-      B32 = L.tileLayer('http://localhost:8181/bregel/bregel32/{z}/{x}/{y}.png',{
-        'mapExtent':[39.45611030, 28.70507522, 103.39688562, 60.43081427],
-        'minZoom':4, 'maxZoom':10, 'zoom': 4, 'pane':'tilelayers'
-      });
-      arrowsmith1810 = L.tileLayer('http://localhost:8181/france/arrowsmith1810/{z}/{x}/{y}.png',{
-        'mapExtent':[-5.61314461, 44.99755790, 4.57197565, 52.23936858],
-        'minZoom':5, 'maxZoom':11, 'pane':'tilelayers'
-      });
 
     // leaflet layers/markers
     drawnLayers = L.featureGroup().addTo(mappy)
@@ -459,14 +447,15 @@
   }
   // delete json feature in db on layer delete
   function deleteFeature(fid){
-    console.log('token','{{ csrf_token }}')
+    <!--console.log('token','{{ csrf_token }}')-->
+    console.log('deleting fid',fid)
     $.ajax({
         type: 'POST',
         url: 'feature_delete/',
         data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,
         cache: false,
         success: function(result){
-          console.log(JSON.stringify(result))
+          console.log('deleteFeature() result',JSON.stringify(result))
         }
       })
   }
@@ -497,14 +486,14 @@
           <!--// cancel the draw to drop marker from cursor-->
           <!--$(".leaflet-draw-actions a")[0].click()-->
         <!--}-->
-        console.log('updateFeature() result:',result)
+        <!--console.log('updateFeature() result:',result)-->
       }   
     })
   }
   
   // create json feature in db
   function createFeature(feat){
-    console.log('feat in createFeature()',feat)
+    <!--console.log('feat in createFeature()',feat)-->
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
     formData.append('mapid', $("#map_select").val())
@@ -528,7 +517,7 @@
           // cancel the draw to drop marker from cursor
           $(".leaflet-draw-actions a")[0].click()
         }
-        console.log('data returned from createFeature()',result)
+        <!--console.log('data returned from createFeature()',result)-->
       }   
     })
   };
@@ -540,8 +529,13 @@
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature properties 'name', 'type' added w/popup form
     mappy.on(L.Draw.Event.CREATED, function (event) {
+      e = event
+      console.log('CREATED event',e)
+      layer_type = e.layerType
+      // get current feature type
+      ftype = $("input[name=ftype]:checked").val()
       window.drawnlayer = event.layer;
-      // console.log('drawnlayer',drawnlayer)
+      <!--console.log('drawnlayer,ftype',drawnlayer,ftype)-->
       drawnlayer.bindPopup(popupNewForm)
       drawnLayers.addLayer(drawnlayer);
       drawnLayers.addTo(mappy)
@@ -550,14 +544,13 @@
 
       // make geojson immediately, add _leaflet_id
       feat = drawnlayer.toGeoJSON()
-      console.log('feat in CREATE',feat)
+      <!--console.log('feat in CREATE',feat)-->
       feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
+      feat['properties']['feature_type'] = ftype
       drawnFeatures.push(feat)
       
-      // save it immediately
-      <!--createFeature(feat)-->
-      
-      // add name and type to geojson
+      // save it immediately      
+      // adding name and type to geojson
       $("#popupform").submit(function(e){
         e.preventDefault();
         // console.log('last feature',findFeat(drawnlayer._leaflet_id));
@@ -573,37 +566,24 @@
 
         // ajax to write a Feature instance
         createFeature(feat)
-        $(".leaflet-draw-draw-circlemarker")[0].click()
+        $(".leaflet-draw-draw-"+layer_type)[0].click()
       });
     });
 
     mappy.on(L.Draw.Event.EDITED, function (event) {
       e = event
-      <!--console.log('event',e)-->
+      console.log('EDITED event',e)
       // layer leaflet_id clicked
       layerid = Number(Object.keys(e.layers._layers)[0]);
+
       // associated feature id 
       fid = e.layers._layers[layerid].feature.fid
-      console.log('layer:'+layerid+'; feature:'+fid)
 
       // selected feature as initially rendered
       feat = idToFeature[fid].feature
-      console.log('pre-EDITED feature',feat)
-      <!--// {type:"Feature",properties:{},geometry:{fid:<int>,name:"",placetype:"",coordinates:[}}-->
   
       // 
       newfeat = drawnLayers._layers[layerid].toGeoJSON()
-
-      <!--ftype = feat.geometry.type-->
-      <!--<!--console.log('ftype',ftype)-->-->
-      <!--<!--lcoords=idToFeature[layerid].getLatLngs()-->-->
-      <!--<!--lcoords = ftype=='Point' ? idToFeature[fid].getLatLng() : idToFeature[fid].getLatLngs()-->-->
-      <!--wkt = toWKT(idToFeature[fid])-->
-      <!--newfeat = idToFeature[fid].toGeoJSON()-->
-      <!--console.log('newfeat',newfeat)-->
-      
-      // update geometry from layer
-      <!--feat['geometry']['coordinates'] = parseCoords(ftype, lcoords)-->
 
       // update database copy
       updateFeature(newfeat)
@@ -611,12 +591,13 @@
     });
 
     mappy.on(L.Draw.Event.DELETED, function (event) {
-      console.clear()
+      <!--console.clear()-->
       e = event
+      console.log('DELETED event',e)
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      // feature id of layer clicked
-      fid = e.layers._layers[layerid].feature.geometry.fid
-      console.log('fid',fid)
+      // db feature id of layer clicked
+      fid = e.layers._layers[layerid].feature.fid
+      console.log('mappy on DELETE fid',fid)
       // strip it from json
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
         return el.properties.leaflet_id != layerid;
