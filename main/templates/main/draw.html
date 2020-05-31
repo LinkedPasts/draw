@@ -79,14 +79,11 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="tab_bench" role="tabpanel">
 <div id="r1" class="radio">
-  <label><input type="radio" name="ftype" value="[300008347]" checked> settlement</label>
-</div>
+  <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
 <div id="r2" class="radio">
-  <label><input type="radio" name="ftype" value="[300008347,300000810]"> settlement/arch site</label>
-</div>
+  <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
 <div id="r3" class="radio">
-  <label><input type="radio" name="ftype" value="[300387178]"> region</label>
-</div>
+  <label><input type="radio" name="placetype" value="300387178"> region</label></div>
         </div>
         <div class="tab-pane fade" id="tab_stats" role="tabpanel">
           <div class="sectionheader">TO DATE</div>
@@ -313,7 +310,8 @@
           <!--console.log('f,l in renderMap()',f,l)-->
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
-          l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.name+'<br/>'+'type: '+f.properties.placetype);
+          l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
+            f.properties.types[0]['identifier']);
           identifier = feature.fid;
           if(feature.type == 'LineString'){
             layer.setStyle(styles.line_default)
@@ -410,9 +408,10 @@
   }, false);
 
   
+  
+  <!--<p>Type: <input type="text" id="types_in" name="types" value=""> </p>\-->
   popupNewForm =
-    '<div><form id="popupform"><p>Name: <input type="text" id="name_in" name="name" value=""></p> \
-      <p>Type: <input type="text" id="type_in" name="type" value=""> </p>\
+    '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" value=""></p> \
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
       Save</button></p></form></div>';
   function toWKT(layer) {
@@ -436,11 +435,11 @@
           return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
       }
   }
+  <!--<p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\-->
   function popupEditForm(feat) {
-    html = '<div><form id="popupeditform"><p>Name: <input type="text" id="name_in"  \
-      name="name" value="'+feat['properties']['name']+'"></p> \
+    html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
+      name="names" value="'+feat['properties']['names']+'"></p> \
       <input type="text" name="lid" value="'+feat['properties']['leaflet_id']+'">\
-      <p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\
       </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
       Save</button></p></div>';
     return html;
@@ -495,8 +494,9 @@
   function createFeature(feat){
     <!--console.log('feat in createFeature()',feat)-->
     var formData = new FormData();
-    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
     formData.append('mapid', $("#map_select").val())
+    formData.append('placetypes',$("input[ftype]:checked").val())
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
 
@@ -527,44 +527,51 @@
     mappy.setView(L.latLng(35.72, -5.295), 2)
     mappy.createPane('tilelayers').style.zIndex = 200
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
-    // feature properties 'name', 'type' added w/popup form
+    // feature property 'names' added w/popup form
+    
     mappy.on(L.Draw.Event.CREATED, function (event) {
       e = event
       console.log('CREATED event',e)
       layer_type = e.layerType
       // get current feature type
-      ftype = $("input[name=ftype]:checked").val()
+      types = $("input[name=placetype]:checked").val().split(',')
       window.drawnlayer = event.layer;
       <!--console.log('drawnlayer,ftype',drawnlayer,ftype)-->
       drawnlayer.bindPopup(popupNewForm)
       drawnLayers.addLayer(drawnlayer);
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
-      $("#name_in").focus()
+      $("#names_in").focus()
 
       // make geojson immediately, add _leaflet_id
       feat = drawnlayer.toGeoJSON()
-      <!--console.log('feat in CREATE',feat)-->
       feat['properties']['leaflet_id'] = drawnlayer._leaflet_id
-      feat['properties']['feature_type'] = ftype
+      feat['properties']['names'] = []
+      feat['properties']['types'] = []
+      feat['properties']['map_id'] = mapid
+      console.log('CREATE feat -> drawnFeatures[]',feat)
       drawnFeatures.push(feat)
       
       // save it immediately      
-      // adding name and type to geojson
+      // adding names and types to geojson
       $("#popupform").submit(function(e){
         e.preventDefault();
         // console.log('last feature',findFeat(drawnlayer._leaflet_id));
-        var feat = findFeat(drawnlayer._leaflet_id)
-        var name = $("#name_in").val();
-        var placetype = $("#type_in").val();
-        feat['properties']['name'] = name;
-        feat['properties']['placetype'] = placetype;
+        feat = findFeat(drawnlayer._leaflet_id)
+        names = $("#names_in").val().split(',');
+        names.forEach(function(n){
+          feat['properties']['names'].push({"toponym":n});
+        })
+        // identifier, label, sourceLabels, when
+        types.forEach(function(t){
+          feat['properties']['types'].push({"identifier":t})
+        })
         // console.log('props',feat['properties']);
         drawnlayer.unbindPopup()
         mappy.closePopup()        
-        drawnlayer.bindPopup('name: '+name+' type: '+placetype)
+        drawnlayer.bindPopup('names: '+names+' types: '+types)
 
-        // ajax to write a Feature instance
+        // write a Feature instance to db
         createFeature(feat)
         $(".leaflet-draw-draw-"+layer_type)[0].click()
       });

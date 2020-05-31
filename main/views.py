@@ -210,15 +210,14 @@ def createFeature(request):
     print('mapid',mapid,type(mapid))
     if mapid > 0:
         feature = json.loads(request.POST['jsonb'])
-        placetype = feature['properties']['placetype']
+        names = feature['properties']['names']
+        types = feature['properties']['types']
         ftype = feature['geometry']['type']
-        #gfield = 'geom_'+('point' if ftype=='Point' else 'line' if ftype=='LineString' else 'poly')
-        # GEOSGeometry('MULTIPOLYGON((( 1 1, 1 2, 2 2, 1 1)))'))
         mapobj = get_object_or_404(Map, pk=int(mapid))
         newfeat = Feature(
             user = request.user,
-            name = feature['properties']['name'],
-            placetype = placetype,
+            name = names[0]['toponym'],
+            placetype = types[0]['identifier'],
             jsonb = feature,
             map = mapobj,
             geom_point = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Point' else None,
@@ -227,7 +226,7 @@ def createFeature(request):
         )
         newfeat.save()
         print('feat',newfeat)
-        result = {"mapid": mapid, "ftype": ftype, "name": feature['properties']['name'], "errors":[]}
+        result = {"mapid": mapid, "ftype": ftype, "name": names[0], "errors":[]}
     else:
         # no map selected
         result = {"errors":["no map selected"]}
