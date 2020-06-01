@@ -19,6 +19,7 @@
   background-color:#fff; padding:4px; font-size:smaller;
   border-left:1px solid #eee; border-right:1px solid #eee;
 }
+#scope_btns {border-bottom:1px dashed #ddd;}
 
 h4, h5 {font-family: 'Raleway', sans-serif;}
 .hidden {display:none;}
