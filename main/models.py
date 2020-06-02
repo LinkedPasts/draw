@@ -67,6 +67,19 @@ class Feature(models.Model):
         managed = True
         db_table = 'features'    
 
+# name-map for atlas index case
+class Name(models.Model):
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=200) # source label(s)
+    maps = ArrayField(models.CharField(max_length=10)) # array of map ids
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        managed = True
+        db_table = 'names'    
+    
 class ProjectUser(models.Model):
     project = models.ForeignKey(Project, related_name='projects',
         default=-1, on_delete=models.CASCADE)

@@ -79,12 +79,16 @@
       <div class="tab-content" id="myTabContent">
         <div id="tab_bench" class="tab-pane fade show active" role="tabpanel">
           <div id="scope_btns" class="my-2 hidden">
-              <label class="radio-inline"><input type="radio" name="scope" value="all" checked> All maps</label>
-              <label class="radio-inline"><input type="radio" name="scope" value="this"> This map</label>
+            <div class="sectionheader">DISPLAYED FEATURES</div>
+            <label class="radio-inline"><input type="radio" name="scope" value="all" checked> All maps</label>
+            <label class="radio-inline"><input type="radio" name="scope" value="this"> This map</label>
           </div>
           <div>
+            <div class="sectionheader">FEATURE TYPES</div>
             <div id="r1" class="radio">
               <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
+            <div id="r1" class="radio">
+              <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
             <div id="r2" class="radio">
               <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
             <div id="r3" class="radio">
