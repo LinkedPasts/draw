@@ -5,6 +5,7 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 
 from main import views
+from api.views import MapNamesView
 
 urlpatterns = [
     path(r'', TemplateView.as_view(template_name="main/index.html"), name="index"),
@@ -21,7 +22,9 @@ urlpatterns = [
     
     path('api/', include('api.urls')),
     path('accounts/', include('accounts.urls')),
-    path('admin/', admin.site.urls)
+    path('admin/', admin.site.urls),
+    path('names/', MapNamesView.as_view(), name='names-api'),
+    
 ]
 # + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 

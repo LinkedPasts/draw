@@ -15,5 +15,4 @@ router.register(r'geoms', views.FeatureViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    #url(r'^union/', views.indexAPIView.as_view(), name='union_api'),
 ]

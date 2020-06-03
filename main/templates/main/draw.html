@@ -147,9 +147,7 @@
 </div>
 
 <script type="text/javascript">
-  // for(x in others){mappy.addLayer(idToFeature[others[x]])}
-  // for(x in others){mappy.removeLayer(idToFeature[others[x]])}
-  
+
   function get_counts(data) {
     counts={"points":0,"lines":0,"polygons":0}
     // TODO: fill those counters
@@ -158,11 +156,15 @@
     
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
-    <!--console.clear()-->
+    $.get('/names', {mapid: map_id},
+      function(names){
+        console.log('loadGeodata() names', names)
+      }
+    )
     <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
-        <!--console.log('loadGeodata() data',data)-->
+        console.log('loadGeodata() data',data)
         geom = {  "type":"FeatureCollection",
                   "features":[],
                   "properties":{"counts":get_counts(data.results)}}
@@ -240,6 +242,7 @@
       $("#slider").removeClass('hidden')
       clearMap()
       mapid = parseInt($(this).val())
+      maplabel = parseInt($(this).text())
       console.log('load map #'+mapid)
       if (mapid != 0) {
         map = maps.find( ({ id }) => id === mapid )

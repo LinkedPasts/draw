@@ -1,17 +1,35 @@
 # api.views
 from django.contrib.auth.models import User, Group
 #from django.db.models import Count
-#from django.http import JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.generic import View
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
 
 from api.serializers import FeatureSerializer
-
 #from accounts.permissions import IsOwnerOrReadOnly, IsOwner
-from main.models import Feature, Map
+from main.models import Feature, Map, Name
+import re
 
+class MapNamesView(View):
+    """ Returns name,type tuples for given map when available """
+    @staticmethod
+    def get(request):
+        #print('MapNamesView GET:',request.GET)
+        """
+        args in request.GET:
+            [string] mapid
+        """    
+        namelist=[]
+        mapid = request.GET.get('mapid')
+        mapnum = re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1)
+        qs=Name.objects.filter(maps__contains=[mapnum]).values_list('name','type')
+        for n in qs:
+            namelist.append({"name":n[0],"type":n[1]})
+        return JsonResponse(namelist, safe=False, json_dumps_params={'ensure_ascii':False})
+    
 # feature for map
 class FeatureViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
@@ -28,10 +46,6 @@ class FeatureViewSet(viewsets.ModelViewSet):
         #print('qs count',qs.count())
         return qs
     
-    #def get_context_data(self, *args, **kwargs):
-        #context = super(GeomViewSet, self).get_context_data(*args, **kwargs)
-        #context['foo'] = 'bar'
-        #return context    
 
 # Linked Places record
 # not operational
