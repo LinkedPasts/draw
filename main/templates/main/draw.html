@@ -49,7 +49,8 @@
   <script src="{% static 'js/leaflet.ajax.min.js' %}"></script>
 {% endblock %}
 {% block content %}
-<div class="container mt-2">
+<div class="container">
+  <div id="names" class="row hidden"></div>
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}
     <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
@@ -80,19 +81,23 @@
         <div id="tab_bench" class="tab-pane fade show active" role="tabpanel">
           <div id="scope_btns" class="my-2 hidden">
             <div class="sectionheader">DISPLAYED FEATURES</div>
-            <label class="radio-inline"><input type="radio" name="scope" value="all" checked> All maps</label>
+            <label class="radio-inline mr-2"><input type="radio" name="scope" value="all" checked> All maps</label>
             <label class="radio-inline"><input type="radio" name="scope" value="this"> This map</label>
           </div>
           <div>
             <div class="sectionheader">FEATURE TYPES</div>
             <div id="r1" class="radio">
               <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
-            <div id="r1" class="radio">
-              <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
             <div id="r2" class="radio">
-              <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
+              <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
             <div id="r3" class="radio">
-              <label><input type="radio" name="placetype" value="300387178"> region</label></div>
+              <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
+            <div id="r4" class="radio">
+              <label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>
+            <div id="r5" class="radio">
+              <label><input type="radio" name="placetype" value="300128214"> empire</label></div>
+            <div id="r6" class="radio">
+              <label><input type="radio" name="placetype" value="300387171"> tribe/tribal group</label></div>
           </div>
         </div> <!-- tab_bench -->
         <div class="tab-pane fade" id="tab_stats" role="tabpanel">
@@ -153,18 +158,26 @@
     // TODO: fill those counters
     return counts  
   }
-    
+  
+  function toggle_names(){
+    $("#names").toggle("slow")
+  }
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
     $.get('/names', {mapid: map_id},
       function(names){
-        console.log('loadGeodata() names', names)
+        <!--console.log('loadGeodata() names', names)-->
+        html = ''
+        for (var i = 0; i < names.length; i++){
+          html+=names[i]['name']+'; '
+        }
+        $('#names').html(html)
       }
     )
     <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
-        console.log('loadGeodata() data',data)
+        <!--console.log('loadGeodata() data',data)-->
         geom = {  "type":"FeatureCollection",
                   "features":[],
                   "properties":{"counts":get_counts(data.results)}}
@@ -243,7 +256,7 @@
       clearMap()
       mapid = parseInt($(this).val())
       maplabel = parseInt($(this).text())
-      console.log('load map #'+mapid)
+      console.log('load map ',mapid)
       if (mapid != 0) {
         map = maps.find( ({ id }) => id === mapid )
         opt={'proj':map.proj_label,'map':map.label,'extent':map.bounds,
@@ -324,10 +337,11 @@
         pointToLayer: function (feature, latlng) {
           <!--console.log('feature in renderMap()',feature)-->
           fid = feature.fid
-          name = feature.properties.name
+          name = feature.properties.names[0]['toponym']
           placetype = feature.properties.placetype
           <!--console.log('matchid',matchid)-->
-          marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
+          marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup(
+            'id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
           idToFeature[fid] = marker
           return marker
         }

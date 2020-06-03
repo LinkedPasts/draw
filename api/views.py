@@ -25,6 +25,7 @@ class MapNamesView(View):
         namelist=[]
         mapid = request.GET.get('mapid')
         mapnum = re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1)
+        print('mapnum from label',mapnum)
         qs=Name.objects.filter(maps__contains=[mapnum]).values_list('name','type')
         for n in qs:
             namelist.append({"name":n[0],"type":n[1]})

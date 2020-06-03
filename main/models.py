@@ -72,6 +72,7 @@ class Name(models.Model):
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=200) # source label(s)
     maps = ArrayField(models.CharField(max_length=10)) # array of map ids
+    flag = models.BooleanField(default=False,null=True) # checked if name is digitized
     
     def __str__(self):
         return self.name

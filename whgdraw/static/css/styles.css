@@ -1,5 +1,8 @@
 /* styles.css */
 
+#names {
+  background-color:oldlace; font-size:.8rem; max-height:75px; overflow-y:scroll;
+}
 #map {
   position:relative; top:0; bottom:0; left:0; height:calc(90vh);
   width: calc(100% - 200px); z-index: 1000; background:aliceblue;
