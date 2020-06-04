@@ -26,9 +26,9 @@ class MapNamesView(View):
         mapid = request.GET.get('mapid')
         mapnum = re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1)
         print('mapnum from label',mapnum)
-        qs=Name.objects.filter(maps__contains=[mapnum]).values_list('name','type')
+        qs=Name.objects.filter(maps__contains=[mapnum],type__in=['settlement'],flag=False).values_list('name','type')
         for n in qs:
-            namelist.append({"name":n[0],"type":n[1]})
+            namelist.append(n[0])
         return JsonResponse(namelist, safe=False, json_dumps_params={'ensure_ascii':False})
     
 # feature for map

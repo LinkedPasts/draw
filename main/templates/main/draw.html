@@ -47,10 +47,14 @@
   <script src="{% static 'js/leaflet-draw/edit/handler/Edit.Circle.js' %}"></script>
 
   <script src="{% static 'js/leaflet.ajax.min.js' %}"></script>
+<style>
+
+</style>
 {% endblock %}
 {% block content %}
 <div class="container">
-  <div id="names" class="row hidden"></div>
+  <div id="names" class="row hidden">
+  </div>
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}
     <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
@@ -84,23 +88,21 @@
             <label class="radio-inline mr-2"><input type="radio" name="scope" value="all" checked> All maps</label>
             <label class="radio-inline"><input type="radio" name="scope" value="this"> This map</label>
           </div>
-          <div>
-            <div class="sectionheader">FEATURE TYPES</div>
-            <div id="r1" class="radio">
-              <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
-            <div id="r2" class="radio">
-              <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
-            <div id="r3" class="radio">
-              <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
-            <div id="r4" class="radio">
-              <label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>
-            <div id="r5" class="radio">
-              <label><input type="radio" name="placetype" value="300128214"> empire</label></div>
-            <div id="r6" class="radio">
-              <label><input type="radio" name="placetype" value="300387171"> tribe/tribal group</label></div>
-          </div>
+          <div class="sectionheader">FEATURE TYPES</div>
+          <div id="r1" class="radio">
+            <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
+          <div id="r2" class="radio">
+            <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
+          <div id="r3" class="radio">
+            <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch site</label></div>
+          <div id="r4" class="radio">
+            <label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>
+          <div id="r5" class="radio">
+            <label><input type="radio" name="placetype" value="300128214"> empire</label></div>
+          <div id="r6" class="radio">
+            <label><input type="radio" name="placetype" value="300387171"> tribe/tribal group</label></div>
         </div> <!-- tab_bench -->
-        <div class="tab-pane fade" id="tab_stats" role="tabpanel">
+        <div id="tab_stats" class="tab-pane fade" role="tabpanel">
           <div class="sectionheader">TO DATE</div>
           <table class="table table-striped table-sm">
             <thead class="thead-light">
@@ -142,6 +144,12 @@
           </div>
         </div>
         <hr/>
+        <form>
+          <div class="form-group">
+            <label for="tags">Tags</label>
+            <input type="text" class="form-control" id="tags">
+          </div>
+        </form>    
         <div class="options" align="center">
           <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
             Download {% fa5_icon 'file-download' 'fas' %}</button>
@@ -152,58 +160,41 @@
 </div>
 
 <script type="text/javascript">
-
-  function get_counts(data) {
-    counts={"points":0,"lines":0,"polygons":0}
-    // TODO: fill those counters
-    return counts  
-  }
-  
-  function toggle_names(){
-    $("#names").toggle("slow")
-  }
-  // load data on change of map selector
-  function loadGeodata(proj_id,map_id) {
-    $.get('/names', {mapid: map_id},
-      function(names){
-        <!--console.log('loadGeodata() names', names)-->
-        html = ''
-        for (var i = 0; i < names.length; i++){
-          html+=names[i]['name']+'; '
-        }
-        $('#names').html(html)
-      }
-    )
-    <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
-    $.get("/api/geoms", {projid: proj_id, mapid: map_id },
-      function(data){
-        <!--console.log('loadGeodata() data',data)-->
-        geom = {  "type":"FeatureCollection",
-                  "features":[],
-                  "properties":{"counts":get_counts(data.results)}}
-        geom['features'] = data.results
-        geom['properties']['counts']
-        if(geom.features.length < 15000) {
-          renderMap(geom)
-        } else {
-          <!--spinner.stop()-->
-          $(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')
-        }
-    })  
-  }
-  function findFeat(leafid) {
-    // console.log('findfeat()',leafid)
-    feat=drawnFeatures.find(function(v){
-      return v['properties']['leaflet_id'] === leafid});
-    return feat;
-  }
   $(function(){
+    availableTags = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+    <!--$("#tags").autocomplete({-->
+      <!--source: name_list-->
+    <!--});-->
     // assign variables to some controls
     project_select = $("#project_select")
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
     scope_btns = $('input[type=radio][name=scope]')
 
+        
     $('#draw_tabs_ul a').on('click', function (e) {
       e.preventDefault()
       $(this).tab('show')
@@ -276,7 +267,58 @@
         for(x in others){mappy.addLayer(idToFeature[others[x]])}
       }
     })
+
   })
+  
+  function get_counts(data) {
+    counts={"points":0,"lines":0,"polygons":0}
+    // TODO: fill those counters
+    return counts  
+  }
+  
+  function toggle_names(){
+    $("#names").toggle("slow")
+  }
+  // load data on change of map selector
+  function loadGeodata(proj_id,map_id) {
+    $.get('/names', {mapid: map_id},
+      function(names){
+        <!--console.log('loadGeodata() names', names)-->
+        name_list = []
+        names_html = ''
+        for (var i = 0; i < names.length; i++){
+          name_list.push(names[i])
+          names_html+=names[i]+'; '
+        }
+        $('#names').html(names_html)
+        $("#names_in").autocomplete({
+          source: name_list
+        });
+      }
+    )
+    <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
+    $.get("/api/geoms", {projid: proj_id, mapid: map_id },
+      function(data){
+        <!--console.log('loadGeodata() data',data)-->
+        geom = {  "type":"FeatureCollection",
+                  "features":[],
+                  "properties":{"counts":get_counts(data.results)}}
+        geom['features'] = data.results
+        geom['properties']['counts']
+        if(geom.features.length < 15000) {
+          renderMap(geom)
+        } else {
+          <!--spinner.stop()-->
+          $(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')
+        }
+    })
+  }
+  function findFeat(leafid) {
+    // console.log('findfeat()',leafid)
+    feat=drawnFeatures.find(function(v){
+      return v['properties']['leaflet_id'] === leafid});
+    return feat;
+  }
   <!--opt={'proj':'bregel','map':'bregel32','extent':[39.4561, 28.7050, 103.3968, 60.4308],-->
         <!--'minzoom':4,'maxzoom':10,'zoom':4}-->
   function addLayer(opt){
@@ -454,9 +496,9 @@
   
   <!--<p>Type: <input type="text" id="types_in" name="types" value=""> </p>\-->
   popupNewForm =
-    '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" value=""></p> \
+    '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" class="ui-autocomplete-input" autocomplete=on></p> \
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
-      Save</button></p></form></div>';
+      Save it</button></p></form></div>';
   function toWKT(layer) {
       var lng, lat, coords = [];
       if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
@@ -574,16 +616,17 @@
     
     mappy.on(L.Draw.Event.CREATED, function (event) {
       e = event
-      console.log('CREATED event',e)
+      console.log('name_list, CREATED event',name_list,e)
       layer_type = e.layerType
       // get current feature type
       types = $("input[name=placetype]:checked").val().split(',')
       window.drawnlayer = event.layer;
       <!--console.log('drawnlayer,ftype',drawnlayer,ftype)-->
       drawnlayer.bindPopup(popupNewForm)
-      drawnLayers.addLayer(drawnlayer);
+      drawnLayers.addLayer(drawnlayer)
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
+      
       $("#names_in").focus()
 
       // make geojson immediately, add _leaflet_id
