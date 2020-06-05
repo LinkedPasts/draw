@@ -43,7 +43,8 @@ class FeatureViewSet(viewsets.ModelViewSet):
         mapid = self.request.GET.get('mapid')
         user = self.request.GET.get('user')
         mapIds = Map.objects.values('id').filter(project = projid)
-        qs = Feature.objects.filter(map__in=mapIds)
+        # places polygons below other features
+        qs = Feature.objects.filter(map__in=mapIds).order_by('geom_poly')
         #print('qs count',qs.count())
         return qs
     

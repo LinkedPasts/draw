@@ -166,6 +166,7 @@
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
     scope_btns = $('input[type=radio][name=scope]')
+    poly = true
 
     $('#draw_tabs_ul a').on('click', function (e) {
       e.preventDefault()
@@ -241,7 +242,6 @@
     })
 
   })
-  
   function get_counts(data) {
     counts={"points":0,"lines":0,"polygons":0}
     // TODO: fill those counters
@@ -308,18 +308,23 @@
     'marker_default': {
       fillColor: "#ff0000",
       color:"#ff0000",
-      radius:6,
+      radius:4,
+      weight:1,
+      fillOpacity:0.5,
+      opacity:0.5},
+    'marker_other': {
+      fillColor: "yellow",
+      color:"#ff0000",
+      radius:3,
       weight:1,
       fillOpacity:0.5,
       opacity:0.5},
     'marker_highlight': {
-      radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"
-    },
+      radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"},
     'line_default':{
       weight:3,
       opacity:1,
-      color: "#00ccff"
-    },
+      color: "#00ccff"},
     'line_highlight':{weight: 4, color:"yellow"},
     'pgon_default':{
       fillColor: "#ff0000",
@@ -328,10 +333,25 @@
       fillOpacity:0.1,
       opacity:1},
     'pgon_highlight':{
-      fillOpacity:1,fillColor:"yellow",color:"#000"
-    }
+      fillOpacity:1,fillColor:"yellow",color:"#000"}
   }
-
+  
+  function styleFunc(feature){
+    markerStyle =  {
+      fillColor: "#ff0000",
+      color:"#ff0000",
+      radius:4,
+      weight:1,
+      fillOpacity:0.5,
+      opacity:0.5}
+      
+    if(feature.properties.map_id != mapid){
+      markerStyle['fillColor'] = "yellow"
+    }
+    return markerStyle
+  }
+  
+  
   function renderMap(geom){
     <!--console.log('dslabel, geom in renderMap()',screen,geom)-->
     <!--console.log('renderMap() geom',geom)-->
@@ -345,7 +365,7 @@
         mappy.removeLayer(features)
       }
       idToFeature = {}  // for layer lookup by fid
-      others=[]
+      others=[]; polygons = []
       features = L.geoJSON(geom, {
         <!--style: styler(geomtype),-->
         pointToLayer: function (feature, latlng) {
@@ -354,22 +374,29 @@
           name = feature.properties.names[0]['toponym']
           placetype = feature.properties.placetype
           <!--console.log('matchid',matchid)-->
-          marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup(
+          <!--marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup(-->
+          marker = L.circleMarker(latlng).bindPopup(
             'id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
+          <!--marker.setStyle(function(feature){-->
+            <!--if(f.feature.properties.map_id == mapid.toString()) { return styles.marker_default}-->
+            <!--else {return styles.marker_other}-->
+          <!--})-->
           idToFeature[fid] = marker
           return marker
         }
+        ,style: styleFunc
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
-          <!--console.log('f,l in renderMap()',f,l)-->
+          console.log('f,l in renderMap()',f,l)
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
           l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
             f.properties.types[0]['identifier']);
-          identifier = feature.fid;
-          if(feature.type == 'LineString'){
+          identifier = f.fid;
+          if(f.geometry.type == 'LineString'){
             layer.setStyle(styles.line_default)
-          } else if(feature.type == 'Polygon'){
+          } else if(f.geometry.type == 'Polygon'){
+            polygons.push(identifier)
             layer.setStyle(styles.pgon_default)
           }
           if (f.properties.map_id != mapid){
@@ -408,6 +435,7 @@
     $(".leaflet-tilelayers-pane").empty()
     drawnLayers.clearLayers()
     drawnFeatures = []
+    polyFeatures = []
   }
   function drawControls(mode){
     var drawControl = new L.Control.Draw({
@@ -450,6 +478,7 @@
 
     // geojson gets pushed in here as drawn; also deleted
     drawnFeatures = []
+    polyFeatures = []
 
     var baseLayers = {
       "OpenStreetmap": osm,
