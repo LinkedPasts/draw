@@ -161,40 +161,12 @@
 
 <script type="text/javascript">
   $(function(){
-    availableTags = [
-      "ActionScript",
-      "AppleScript",
-      "Asp",
-      "BASIC",
-      "C",
-      "C++",
-      "Clojure",
-      "COBOL",
-      "ColdFusion",
-      "Erlang",
-      "Fortran",
-      "Groovy",
-      "Haskell",
-      "Java",
-      "JavaScript",
-      "Lisp",
-      "Perl",
-      "PHP",
-      "Python",
-      "Ruby",
-      "Scala",
-      "Scheme"
-    ];
-    <!--$("#tags").autocomplete({-->
-      <!--source: name_list-->
-    <!--});-->
-    // assign variables to some controls
+    // assign variables to some elements
     project_select = $("#project_select")
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
     scope_btns = $('input[type=radio][name=scope]')
 
-        
     $('#draw_tabs_ul a').on('click', function (e) {
       e.preventDefault()
       $(this).tab('show')

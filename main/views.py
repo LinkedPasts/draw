@@ -142,7 +142,7 @@ class MapUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self, *args, **kwargs):
         proj_id=get_object_or_404(Map,pk=self.kwargs.get("pk")).project_id
         print('get_success_url; proj_id',proj_id)        
-        return '/home/project_update/'+str(proj_id)
+        return '/project_update/'+str(proj_id)
 
 @login_required
 def fetchProjects(request):
@@ -181,10 +181,10 @@ def deleteFeature(request,*args,**kwargs):
 @login_required    
 def updateFeature(request):
     newfeat = json.loads(request.POST['jsonb'])
-    _id = newfeat['fid']
-    name = newfeat['properties']['name']; print(name)
-    placetype = newfeat['properties']['placetype']; print(placetype)
     print('newfeat in updateFeature(), type', newfeat,type(newfeat))
+    _id = newfeat['fid']
+    name = newfeat['properties']['names'][0]['toponym']; print(name)
+    placetype = newfeat['properties']['types'][0]['identifier']; print(placetype)
     # get existing 
     #fobj = get_object_or_404(Feature, pk=_id)
     fobj = Feature.objects.filter(pk=_id)
