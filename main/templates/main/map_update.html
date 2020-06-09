@@ -10,7 +10,6 @@
   <div class="pt-3">
     <h4 class="text-warning">update map</h4>
     <form method="post">{% csrf_token %}
-      {{ project_id }}
         {{ form.as_p }}
         <input type="submit" value="Update">
     </form>

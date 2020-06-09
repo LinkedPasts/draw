@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.geos import GEOSGeometry
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import (View, CreateView, DeleteView, ListView, UpdateView)
@@ -11,6 +11,15 @@ import json, sys
 from .utils import myprojects
 from main.models import Project, Map, Feature
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
+
+def download_project(request, *args, **kwargs):
+    proj=get_object_or_404(Project,pk=kwargs['projid'])
+    print(proj.title)
+    
+    #response = FileResponse(open(fn, 'rb'), content_type='text/json')
+    #response['Content-Disposition'] = 'attachment; filename="'+os.path.basename(fn)+'"'
+    
+    #return response
 
 class DrawView(LoginRequiredMixin, View):
     #template_name = 'main/draw.html'
@@ -121,14 +130,15 @@ class MapDeleteView(DeleteView):
         return reverse('home')
 
 class MapUpdateView(LoginRequiredMixin, UpdateView):
+    form_class = MapCreateModelForm
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
     #success_url='/home/project_update/'+str(proj_id)
 
     model = Map
     template_name = 'main/map_update.html'
-    fields = ['id', 'project', 'title', 'label', 'owner', 'cite_text', 'cite_uri',
-              'minzoom','maxzoom','bounds']
+    #fields = ['id', 'project', 'title', 'label', 'cite_text', 'cite_uri', 'tiles', 'when',
+              #'when_constant','minzoom','maxzoom','bounds']
     
     def get_context_data(self, *args, **kwargs):
         context = super(MapUpdateView, self).get_context_data(*args, **kwargs)
@@ -158,7 +168,8 @@ def fetchProjects(request):
         result['maps'].append(
             {'id':m.id, 'proj_id':m.project_id, 'proj_label':m.project.label, 'label':m.label, 
              'title':m.title, 'cite_uri':m.cite_uri, 'cite_text':m.cite_text, 
-             'minzoom':m.minzoom, 'maxzoom':m.maxzoom, 'bounds':m.bounds}
+             'minzoom':m.minzoom, 'maxzoom':m.maxzoom, 'bounds':m.bounds,
+             'when':m.when, 'when_constant':m.when_constant}
         )
     
     return JsonResponse(result,safe=False)

@@ -144,16 +144,17 @@
           </div>
         </div>
         <hr/>
-        <form>
-          <div class="form-group">
-            <label for="tags">Tags</label>
-            <input type="text" class="form-control" id="tags">
-          </div>
-        </form>    
+        <!--<form>-->
+          <!--<div class="form-group">-->
+            <!--<label for="tags">Tags</label>-->
+            <!--<input type="text" class="form-control" id="tags">-->
+          <!--</div>-->
+        <!--</form>    -->
         <div class="options" align="center">
           <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
             Download {% fa5_icon 'file-download' 'fas' %}</button>
         </div>      
+        <!--<p><a href="{ url ':dl-project' id=projid %}"></p>-->
       </div>
     </div> <!-- sidebar -->
   </div>
@@ -225,7 +226,6 @@
         map = maps.find( ({ id }) => id === mapid )
         opt={'proj':map.proj_label,'map':map.label,'extent':map.bounds,
         'minzoom':map.minzoom,'maxzoom':map.maxzoom,'zoom':map.minzoom}
-        <!--console.log('opt',opt)-->
         addLayer(opt)
       }
       loadGeodata(map.proj_id,mapid)
@@ -271,7 +271,7 @@
     <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
-        <!--console.log('loadGeodata() data',data)-->
+        console.log('loadGeodata() data',data)
         geom = {  "type":"FeatureCollection",
                   "features":[],
                   "properties":{"counts":get_counts(data.results)}}
@@ -294,7 +294,8 @@
   <!--opt={'proj':'bregel','map':'bregel32','extent':[39.4561, 28.7050, 103.3968, 60.4308],-->
         <!--'minzoom':4,'maxzoom':10,'zoom':4}-->
   function addLayer(opt){
-    url = `http://localhost:8181/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;
+    <!--url = `http://localhost:8181/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;-->
+    url = `http://whgazetteer.org/tiles/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;
     layer = L.tileLayer(url,{'mapExtent':opt.extent,'minZoom':opt.minzoom,
       'maxZoom':opt.maxzoom, 'zoom':opt.zoom, 'pane':'tilelayers'});
     var extent = layer.options.mapExtent
@@ -339,14 +340,15 @@
   function styleFunc(feature){
     markerStyle =  {
       fillColor: "#ff0000",
-      color:"#ff0000",
-      radius:4,
+      color:"#333",
+      radius:5,
       weight:1,
       fillOpacity:0.5,
       opacity:0.5}
       
     if(feature.properties.map_id != mapid){
-      markerStyle['fillColor'] = "yellow"
+      markerStyle['fillColor'] = "green"
+      markerStyle['radius'] = 4
     }
     return markerStyle
   }
@@ -374,20 +376,15 @@
           name = feature.properties.names[0]['toponym']
           placetype = feature.properties.placetype
           <!--console.log('matchid',matchid)-->
-          <!--marker = L.circleMarker(latlng).setStyle(styles.marker_default).bindPopup(-->
           marker = L.circleMarker(latlng).bindPopup(
             'id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
-          <!--marker.setStyle(function(feature){-->
-            <!--if(f.feature.properties.map_id == mapid.toString()) { return styles.marker_default}-->
-            <!--else {return styles.marker_other}-->
-          <!--})-->
           idToFeature[fid] = marker
           return marker
         }
         ,style: styleFunc
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
-          console.log('f,l in renderMap()',f,l)
+          <!--console.log('f,l in renderMap()',f,l)-->
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
           l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
@@ -467,9 +464,7 @@
       // mapbox layers
     var satellite  = L.tileLayer(mbstyle_url, {id:'mapbox/satellite-streets-v11', token:token_mb, attribution:attrib_mb})
       osm  = L.tileLayer(mbstyle_url, {id:'mapbox/light-v10', token:token_mb, attribution:attrib_mb}),
-      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_kg, attribution:attrib_awmc});
-      <!--satellite  = L.tileLayer(mbtiles_url, {id:'mapbox.satellite', token:mb_token, attribution:attrib_mb});-->
-      <!--osm  = L.tileLayer(mbtiles_url, {id:'mapbox.light', token:mb_token, attribution:attrib_mb}),-->
+      awmc = L.tileLayer(mbtiles_url, {id:'isawnyu.map-knmctlkh', token:token_kg, attribution:attrib_awmc}),
 
 
     // leaflet layers/markers
@@ -493,9 +488,6 @@
     baseLayers['OpenStreetmap'].addTo(mappy)
   }, false);
 
-  
-  
-  <!--<p>Type: <input type="text" id="types_in" name="types" value=""> </p>\-->
   popupNewForm =
     '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" class="ui-autocomplete-input" autocomplete=on></p> \
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
@@ -617,7 +609,7 @@
     
     mappy.on(L.Draw.Event.CREATED, function (event) {
       e = event
-      console.log('name_list, CREATED event',name_list,e)
+      <!--console.log('name_list, CREATED event',name_list,e)-->
       layer_type = e.layerType
       // get current feature type
       types = $("input[name=placetype]:checked").val().split(',')
@@ -636,7 +628,7 @@
       feat['properties']['names'] = []
       feat['properties']['types'] = []
       feat['properties']['map_id'] = mapid
-      console.log('CREATE feat -> drawnFeatures[]',feat)
+      <!--console.log('CREATE feat -> drawnFeatures[]',feat)-->
       drawnFeatures.push(feat)
       
       // save it immediately      
@@ -653,11 +645,17 @@
         types.forEach(function(t){
           feat['properties']['types'].push({"identifier":t})
         })
-        // console.log('props',feat['properties']);
+        <!--if(map.when_constant){console.log(map.when)}-->
+        mapobj = maps.find( ({ id }) => id === mapid )
+        console.log(mapobj)
+        if(mapobj.when_constant){feat['when']=mapobj.when}
+        
+        <!--console.log('props',feat['properties']);-->
         drawnlayer.unbindPopup()
         mappy.closePopup()        
         drawnlayer.bindPopup('names: '+names+' types: '+types)
-
+        //             
+        console.log('written feature',feat)
         // write a Feature instance to db
         createFeature(feat)
         $(".leaflet-draw-draw-"+layer_type)[0].click()

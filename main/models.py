@@ -27,16 +27,20 @@ class Map(models.Model):
         related_name='maps', on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         related_name='maps', on_delete=models.CASCADE)
-
-    title = models.CharField(max_length=255)
-    label = models.CharField(max_length=20)
-    year = models.IntegerField(null=True)
-    cite_uri = models.URLField(null=True)
-    cite_text = models.CharField(max_length=2044, null=False)
     create_date = models.DateTimeField(auto_now_add=True)
-    tiles = models.BooleanField(default=False)
+
+    label = models.CharField(max_length=20, unique=True) # unique slug
+    title = models.CharField(max_length=500) # as published
+    year_pub = models.IntegerField(null=True)
+    cite_uri = models.URLField(null=True) # permalink
+    cite_text = models.CharField(max_length=2044, null=False) # proper citation
+    tiles = models.BooleanField(default=False) # tiles in place?
     
-    # values 
+    # temporal coverage
+    when = JSONField(null=True)
+    when_constant = models.BooleanField(default=True) # use map when for all its features?
+    
+    # tileset metadata
     minzoom = models.CharField(max_length=2,null=True)
     maxzoom = models.CharField(max_length=2,null=True)
     bounds = ArrayField(models.DecimalField(decimal_places=8,max_digits=11),null=True)
@@ -57,8 +61,9 @@ class Feature(models.Model):
 
     name = models.CharField(max_length=255)
     placetype = models.CharField(max_length=20, blank=False, null=False)
-    jsonb = JSONField(blank=True, null=True)
+    jsonb = JSONField(blank=True, null=True) # includes when
     
+    # write one at creation, for heck of it
     geom_point = geo.PointField(blank=True, null=True)
     geom_line = geo.LineStringField(blank=True, null=True)
     geom_poly = geo.PolygonField(blank=True, null=True)

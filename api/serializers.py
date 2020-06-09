@@ -10,8 +10,9 @@ class FeatureSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(source='jsonb.type')
     properties = serializers.ReadOnlyField(source='jsonb.properties')
     geometry = serializers.ReadOnlyField(source='jsonb.geometry')
+    when = serializers.ReadOnlyField(source='jsonb.when')
     
     class Meta:
         model = Feature
-        fields = ('fid','type','geometry','properties')
+        fields = ('fid','type','geometry','properties','when')
 

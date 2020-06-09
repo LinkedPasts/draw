@@ -27,12 +27,13 @@ class ProjectCreateModelForm(forms.ModelForm):
 class MapCreateModelForm(forms.ModelForm):
     class Meta:
         model = Map
-        fields = ('owner','project','title','label','cite_uri','cite_text')
+        fields = ('owner','project','title','label', 'year_pub',
+                  'cite_uri','cite_text', 'tiles', 'when', 'when_constant', 'minzoom', 'maxzoom', 'bounds')
         widgets = {
-        'description': forms.Textarea(attrs={
-          'rows':2,'cols': 35,'class':'textarea','placeholder':'brief description'})
-      ,'uri_base': forms.URLInput(attrs={
-          'placeholder':'Leave blank unless record IDs are URIs','size':35})
+        'when': forms.Textarea(attrs={
+          'rows':2,'cols': 35,'class':'textarea','placeholder':'json when object'})
+        ,'cite_uri': forms.URLInput(attrs={
+          'placeholder':'Permalink?','size':35})
     }
 
 
