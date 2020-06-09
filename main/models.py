@@ -4,6 +4,7 @@ from django.contrib.gis.db import models as geo
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from main.choices import TEAMROLES
 
 class Project(models.Model):
@@ -14,6 +15,15 @@ class Project(models.Model):
     label = models.CharField(max_length=20)
     uri = models.URLField(blank=True, null=True)
     create_date = models.DateTimeField(null=True, auto_now_add=True)
+
+    #@property
+    #def placetypes(self):
+        #ppts=ProjectPlacetype.objects.filter(project_id = self.id)
+        #types=[]
+        #for pt in ppts:
+            #t = get_object_or_404(Placetype, id=pt.id)
+            #types.append({'identifier':'aat:'+t.aat_id, 'label':t.term})
+        #return types
 
     def __str__(self):
         return self.label
@@ -44,6 +54,15 @@ class Map(models.Model):
     minzoom = models.CharField(max_length=2,null=True)
     maxzoom = models.CharField(max_length=2,null=True)
     bounds = ArrayField(models.DecimalField(decimal_places=8,max_digits=11),null=True)
+
+    #@property
+    #def placetypes(self):
+        #mpts=MapPlacetype.objects.filter(map_id = self.id)
+        #types=[]
+        #for pt in mpts:
+            #t = get_object_or_404(Placetype, id=pt.id)
+            #types.append({'identifier':'aat:'+t.aat_id, 'label':t.term})
+        #return types
 
     def __str__(self):
         return self.label
@@ -96,4 +115,36 @@ class ProjectUser(models.Model):
     class Meta:
         managed = True
         db_table = 'project_user'
-            
+    
+class Placetype(models.Model):
+    aat_id = models.IntegerField(unique=True)
+    parent_id = models.IntegerField(null=True,blank=True)
+    term = models.CharField(max_length=100)
+    term_full = models.CharField(max_length=100)
+    note = models.TextField(max_length=3000)
+    fclass = models.CharField(max_length=1,null=True,blank=True)
+    
+    def __str__(self):
+        return str(self.aat_id) +':'+self.term
+    
+    class Meta:
+        managed = True
+        db_table = 'placetypes'
+
+# placetypes designated per project
+class ProjectPlacetype(models.Model):
+    project = models.ForeignKey(Project,default=-1, on_delete=models.CASCADE)    
+    placetype = models.ForeignKey(Placetype,default=-1, on_delete=models.CASCADE)
+ 
+    class Meta:
+        managed = True
+        db_table = 'project_placetype'
+
+# placetypes designated per map
+class MapPlacetype(models.Model):
+    map = models.ForeignKey(Map, default=-1, on_delete=models.CASCADE)    
+    placetype = models.ForeignKey(Placetype, default=-1, on_delete=models.CASCADE)
+ 
+    class Meta:
+        managed = True
+        db_table = 'map_placetype'
