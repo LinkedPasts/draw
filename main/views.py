@@ -193,12 +193,13 @@ def deleteFeature(request,*args,**kwargs):
 def updateFeature(request):
     newfeat = json.loads(request.POST['jsonb'])
     print('newfeat in updateFeature(), type', newfeat,type(newfeat))
-    _id = newfeat['fid']
+    #_id = newfeat['fid']
+    leaflet_id = newfeat['properties']['leaflet_id']
     name = newfeat['properties']['names'][0]['toponym']; print(name)
     placetype = newfeat['properties']['types'][0]['identifier']; print(placetype)
     # get existing 
-    #fobj = get_object_or_404(Feature, pk=_id)
-    fobj = Feature.objects.filter(pk=_id)
+    #fobj = Feature.objects.filter(pk=_id)
+    fobj = Feature.objects.filter(jsonb__properties__leaflet_id = leaflet_id)
     ftype = newfeat['geometry']['type']; print(ftype) # Point, LineString, etc
     geowkt = GEOSGeometry(json.dumps(newfeat['geometry']))
     # replace some values
@@ -209,7 +210,7 @@ def updateFeature(request):
         fobj.update(geom_point = geowkt if ftype == 'Point' else None)
         fobj.update(geom_line = geowkt if ftype == 'LineString' else None)
         fobj.update(geom_poly = geowkt if ftype == 'Polygon' else None)
-        result = {"msg":"updated"+json.dumps(newfeat)}    
+        result = {"msg":"updated "+json.dumps(newfeat)}    
     except:
         result = {"msg":"updating "+str(_id)+' failed; '+sys.exc_info()}
     return JsonResponse(result,safe=False)

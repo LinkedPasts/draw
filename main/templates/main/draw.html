@@ -398,13 +398,6 @@
             f.properties.types[0]['identifier']);
           identifier = f.fid;
           l.setStyle(styleFunc(f))
-          <!--if(f.geometry.type == 'LineString'){-->
-            <!--<!--layer.setStyle(styles.line_default)-->-->
-            <!--layer.setStyle(styleFunc(f))-->
-          <!--} else if(f.geometry.type == 'Polygon'){-->
-            <!--polygons.push(identifier)-->
-            <!--<!--layer.setStyle(styles.pgon_default)-->-->
-          <!--}-->
           if (f.properties.map_id != mapid){
             others.push(identifier)
           }
@@ -549,7 +542,7 @@
   // updates json feature in drawnFeatures and db on EDITED
   function updateFeature(newfeat){
     <!--console.clear()-->
-    console.log('newfeat in js updateFeature()',newfeat)
+    console.log('edited feat in js updateFeature()',newfeat)
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
     formData.append('mapid', $("#map_select").val())
@@ -656,7 +649,7 @@
         })
         <!--if(map.when_constant){console.log(map.when)}-->
         mapobj = maps.find( ({ id }) => id === mapid )
-        console.log(mapobj)
+        <!--console.log(mapobj)-->
         if(mapobj.when_constant){feat['when']=mapobj.when}
         
         <!--console.log('props',feat['properties']);-->
@@ -664,7 +657,7 @@
         mappy.closePopup()        
         drawnlayer.bindPopup('names: '+names+' types: '+types)
         //             
-        console.log('written feature',feat)
+        <!--console.log('written feature',feat)-->
         // write a Feature instance to db
         createFeature(feat)
         $(".leaflet-draw-draw-"+layer_type)[0].click()
@@ -674,20 +667,21 @@
     mappy.on(L.Draw.Event.EDITED, function (event) {
       e = event
       console.log('EDITED event',e)
-      // layer leaflet_id clicked
+
+      // leaflet_id of clicked layer 
       layerid = Number(Object.keys(e.layers._layers)[0]);
 
-      // associated feature id 
-      fid = e.layers._layers[layerid].feature.fid
+      console.log('feat coords before',feat.geometry.coordinates)
 
-      // selected feature as initially rendered
-      feat = idToFeature[fid].feature
-  
-      // 
-      newfeat = drawnLayers._layers[layerid].toGeoJSON()
+      // get new geometry
+      newgeom = drawnLayers._layers[layerid].toGeoJSON().geometry
+      // replace in feat
+      feat.geometry = newgeom
 
-      // update database copy
-      updateFeature(newfeat)
+      console.log('feat coords after',feat.geometry.coordinates)
+
+      // update database 
+      updateFeature(feat)
       $(".leaflet-draw-draw-circlemarker").click()
     });
 
