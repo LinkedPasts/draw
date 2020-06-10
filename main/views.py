@@ -188,7 +188,7 @@ def deleteFeature(request,*args,**kwargs):
             result = {"msg":"delete of "+str(id)+' failed: '+sys.exc_info()}
             print('delete failed',_id, sys.exc_info())
     return JsonResponse(result,safe=False)
-    
+
 @login_required    
 def updateFeature(request):
     newfeat = json.loads(request.POST['jsonb'])
