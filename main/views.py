@@ -167,16 +167,19 @@ def fetchProjects(request):
         projects = Project.objects.filter( Q(id__in=collab_projects) | Q(owner=u) )
     #maps = Map.objects.filter(tiles=True)
     maps = Map.objects.filter(tiles=True,project__in=projects)
+    #feature_count = sum([m.features.count() for m in maps])
     for p in projects:
+        count=sum([m.features.count() for m in p.maps.all()])
         result['projects'].append(
-            {'id':p.id, 'owner':p.owner_id, 'label':p.label, 'title':p.title}
+            {'id':p.id, 'owner':p.owner_id, 'label':p.label, 'title':p.title
+            ,'feature_count':count}
         )
     for m in maps:
         result['maps'].append(
             {'id':m.id, 'proj_id':m.project_id, 'proj_label':m.project.label, 'label':m.label, 
              'title':m.title, 'cite_uri':m.cite_uri, 'cite_text':m.cite_text, 
              'minzoom':m.minzoom, 'maxzoom':m.maxzoom, 'bounds':m.bounds,
-             'when':m.when, 'when_constant':m.when_constant}
+             'when':m.when, 'when_constant':m.when_constant,'feature_count':m.features.count()}
         )
     
     return JsonResponse(result,safe=False)
@@ -238,7 +241,7 @@ def createFeature(request):
         newfeat = Feature(
             user = request.user,
             name = names[0]['toponym'],
-            placetype = types[0]['identifier'],
+            placetype = types[0]['label'],
             jsonb = feature,
             map = mapobj,
             geom_point = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Point' else None,

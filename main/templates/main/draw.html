@@ -65,12 +65,13 @@
             <option value="0" selected>Select project</option>
           </select>
         </div>
-      <div id="div_map_select" class="form-group hidden">
+      <div id="div_map_select" class="form-group hidden mb-1">
         <h5>Map</h5>
           <select id="map_select" class="form-control custom-select-sm">
             <option value="0" selected>Select map</option>
           </select>
       </div>
+      <p id="map_title"></p>
       <hr/>
       <!-- tabs here -->
       <ul id="draw_tabs_ul" class="nav nav-tabs">
@@ -176,8 +177,8 @@
     })    
     // get project and map records
     $.ajax({ url: '/draw/fetch_projects/' }).done(function(data){
-      <!--console.log('projects & maps',data)-->
       projdata = data;
+      <!--console.log('projects & maps',projdata)-->
       $.each(data.projects, function (i, p) {
         <!--console.log('proj',p)-->
         $(project_select).append($('<option>', { 
@@ -226,6 +227,7 @@
       console.log('load map ',mapid)
       if (mapid != 0) {
         map = maps.find( ({ id }) => id === mapid )
+        $("#map_title").html(map.title)
         opt={'proj':map.proj_label,'map':map.label,'extent':map.bounds,
         'minzoom':map.minzoom,'maxzoom':map.maxzoom,'zoom':map.minzoom}
         addLayer(opt)
@@ -307,38 +309,7 @@
     mappy.addLayer(layer)
     'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
   }
-  <!--styles = {-->
-    <!--'marker_default': {-->
-      <!--fillColor: "#ff0000",-->
-      <!--color:"#ff0000",-->
-      <!--radius:4,-->
-      <!--weight:1,-->
-      <!--fillOpacity:0.5,-->
-      <!--opacity:0.5},-->
-    <!--'marker_other': {-->
-      <!--fillColor: "yellow",-->
-      <!--color:"#ff0000",-->
-      <!--radius:3,-->
-      <!--weight:1,-->
-      <!--fillOpacity:0.5,-->
-      <!--opacity:0.5},-->
-    <!--'marker_highlight': {-->
-      <!--radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"},-->
-    <!--'line_default':{-->
-      <!--weight:3,-->
-      <!--opacity:1,-->
-      <!--color: "#00ccff"},-->
-    <!--'line_highlight':{weight: 4, color:"yellow"},-->
-    <!--'pgon_default':{-->
-      <!--fillColor: "#ff0000",-->
-      <!--color:"#fff",-->
-      <!--weight:2,-->
-      <!--fillOpacity:0.1,-->
-      <!--opacity:1},-->
-    <!--'pgon_highlight':{-->
-      <!--fillOpacity:1,fillColor:"yellow",color:"#000"}-->
-  <!--}-->
-  
+ 
   function styleFunc(feature){
     <!--console.log('in styleFunc()')-->
     markerStyle =  {
@@ -578,7 +549,7 @@
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
     formData.append('mapid', $("#map_select").val())
-    formData.append('placetypes',$("input[ftype]:checked").val())
+    formData.append('placetypes', $("input[ftype]:checked").val())
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
 
