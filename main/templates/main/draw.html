@@ -162,6 +162,7 @@
 
 <script type="text/javascript">
   $(function(){
+    flag = false;
     // assign variables to some elements
     project_select = $("#project_select")
     map_select = $("#map_select")
@@ -531,6 +532,7 @@
     $.ajax({
         type: 'POST',
         url: 'feature_delete/',
+        <!--data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,-->
         data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,
         cache: false,
         success: function(result){
@@ -670,19 +672,26 @@
 
       // leaflet_id of clicked layer 
       layerid = Number(Object.keys(e.layers._layers)[0]);
+      console.log('layerid',layerid)
 
+      // no feat object? get it
+      if (typeof feat == 'undefined' || flag == true) {
+        feat = e.layers._layers[layerid].feature
+        flag = true;
+        console.log('new feat',feat)
+      }
+      
       console.log('feat coords before',feat.geometry.coordinates)
-
       // get new geometry
       newgeom = drawnLayers._layers[layerid].toGeoJSON().geometry
       // replace in feat
       feat.geometry = newgeom
-
       console.log('feat coords after',feat.geometry.coordinates)
-
+      
       // update database 
       updateFeature(feat)
       $(".leaflet-draw-draw-circlemarker").click()
+
     });
 
     mappy.on(L.Draw.Event.DELETED, function (event) {
@@ -690,17 +699,61 @@
       e = event
       console.log('DELETED event',e)
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      // db feature id of layer clicked
-      fid = e.layers._layers[layerid].feature.fid
-      console.log('mappy on DELETE fid',fid)
+      console.log('layerid',layerid)
+
       // strip it from json
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
         return el.properties.leaflet_id != layerid;
       })
+
+      // what the FUCK is true right here????
+      <!--console.log('feat?',feat)-->
+      // deleting post-refresh feature: no; 
+      // deleting new feature: yes
+      if (typeof feat == 'undefined') {
+        feat = e.layers._layers[layerid].feature
+        lid = feat.properties.leaflet_id
+        console.log('no feat, made one:lid,fid',lid, feat,feat.fid)
+      } else {
+        lid = feat.properties.leaflet_id
+        console.log('yes, a feat-lid:',lid)
+      }
+      deleteFeature(lid)
+      
+      <!--if (typeof feat == 'undefined' || flag == true) {-->
+      <!--if (typeof feat == 'undefined') {-->
+        <!--feat = e.layers._layers[layerid].feature-->
+        <!--flag = true;-->
+        <!--console.log('feat leaflet_id',feat.properties.leaflet_id)-->
+        <!--<!--deleteFeature(feat.fid)-->-->
+        <!--deleteFeature(feat.properties.leaflet_id)-->
+      <!--} else {-->
+        <!--console.log('no fid yet')-->
+      <!--}-->
+      <!--console.log('feat',feat)-->
+
       // need to delete it from db here
-      deleteFeature(fid)
       drawnLayers.addTo(mappy);
-    });  }
+    });
+    
+    <!--mappy.on(L.Draw.Event.DELETED, function (event) {-->
+      <!--<!--console.clear()-->-->
+      <!--e = event-->
+      <!--console.log('DELETED event',e)-->
+      <!--layerid = Number(Object.keys(e.layers._layers)[0]);-->
+            
+      <!--// db feature id of layer clicked-->
+      <!--fid = e.layers._layers[layerid].feature.fid-->
+      <!--console.log('mappy on DELETE fid',fid)-->
+      <!--// strip it from json-->
+      <!--drawnFeatures = $.grep(drawnFeatures, function(el,idx){-->
+        <!--return el.properties.leaflet_id != layerid;-->
+      <!--})-->
+      <!--// need to delete it from db here-->
+      <!--deleteFeature(fid)-->
+      <!--drawnLayers.addTo(mappy);-->
+    <!--});  -->
+  }
     
 </script>
 {% endblock %}

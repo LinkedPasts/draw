@@ -179,13 +179,15 @@ def deleteFeature(request,*args,**kwargs):
     print('deleteFeature() request', request)
     print('in deleteFeature() kwargs', kwargs)
     if request.method == 'POST':
-        _id = request.POST.get('fid')
+        #_id = request.POST.get('fid')
+        _id = int(request.POST.get('fid'))
         #result = {"msg":"id in kwargs: "+str(_id)}
         try:
-            get_object_or_404(Feature, pk=_id).delete()
+            #get_object_or_404(Feature, pk=_id).delete()
+            get_object_or_404(Feature, jsonb__properties__leaflet_id = _id).delete()
             result = {"msg":"deleted "+str(_id)}
         except:
-            result = {"msg":"delete of "+str(id)+' failed: '+sys.exc_info()}
+            result = {"msg":"delete of "+str(id)+' failed: '+str(sys.exc_info())}
             print('delete failed',_id, sys.exc_info())
     return JsonResponse(result,safe=False)
 
