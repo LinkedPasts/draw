@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.geos import GEOSGeometry
 from django.http import HttpResponse, JsonResponse, FileResponse
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import (View, CreateView, DeleteView, ListView, UpdateView)
@@ -51,7 +52,7 @@ class DashboardView(LoginRequiredMixin, ListView):
             return Project.objects.all().order_by('-id')
         else:
             # returns permitted datasets (rw) + black and dplace (ro)
-            return Project.objects.filter( Q(id__in=myprojects(me)) | Q(owner=me) | Q(id__lt=3)).order_by('-id')
+            return Project.objects.filter( Q(id__in=myprojects(me)) | Q(owner=me) ).order_by('-id')
 
     def get_context_data(self, *args, **kwargs):
         me = self.request.user

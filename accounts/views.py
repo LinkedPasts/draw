@@ -40,7 +40,7 @@ def register(request):
         if request.POST['password1'] == request.POST['password2']:
             try:
                 User.objects.get(username=request.POST['username'])
-                return render(request, 'accounts/register.html', {'error': 'User ID is already taken'})
+                return render(request, 'accounts/register.html', {'error': 'Username is already taken'})
             except User.DoesNotExist:
                 print('request.POST',request.POST)
                 user = User.objects.create_user(
@@ -54,7 +54,7 @@ def register(request):
                 user.profile.user_type=request.POST['user_type']
                 user.profile.name=request.POST['name']
                 auth.login(request, user)
-                return redirect('home')
+                return redirect('dashboard')
         else:
             return render(request, 'accounts/register.html', {'error': 'Sorry, password mismatch!'})
     else:
