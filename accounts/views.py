@@ -4,36 +4,36 @@ from django.contrib import auth, messages
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 
-# from accounts.forms import UserModelForm, ProfileModelForm
+from accounts.forms import UserModelForm, ProfileModelForm
 
-# @login_required
-# @transaction.atomic
-# def update_profile(request):
-#     print('request.method',request.method)
-#     context = {}
-#     if request.method == 'POST':
-#         user_form = UserModelForm(request.POST, instance=request.user)
-#         profile_form = ProfileModelForm(request.POST, instance=request.user.profile)
-#         if user_form.is_valid() and profile_form.is_valid():
-#             user_form.save()
-#             profile_form.save()
-#             messages.success(request, ('Your profile was successfully updated!'))
-#             return redirect('profile')
-#         else:
-#             print('error, cleaned_data',user_form,profile_form)
-#             messages.error(request, ('Please correct the error below.'))
-#     else:
-#         user_form = UserModelForm(instance=request.user)
-#         profile_form = ProfileModelForm(instance=request.user.profile)
-#         id_ = request.user.id
-#         u = get_object_or_404(User, id=id_)
-#         context['groups'] = u.groups.values_list('name',flat=True)
+@login_required
+@transaction.atomic
+def update_profile(request):
+    print('request.method',request.method)
+    context = {}
+    if request.method == 'POST':
+        user_form = UserModelForm(request.POST, instance=request.user)
+        profile_form = ProfileModelForm(request.POST, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, ('Your profile was successfully updated!'))
+            return redirect('profile')
+        else:
+            print('error, cleaned_data',user_form,profile_form)
+            messages.error(request, ('Please correct the error below.'))
+    else:
+        user_form = UserModelForm(instance=request.user)
+        profile_form = ProfileModelForm(instance=request.user.profile)
+        id_ = request.user.id
+        u = get_object_or_404(User, id=id_)
+        context['groups'] = u.groups.values_list('name',flat=True)
 #
-#     return render(request, 'accounts/profile.html', {
-#         'user_form': user_form,
-#         'profile_form': profile_form,
-#         'context': context
-#     })
+    return render(request, 'accounts/profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'context': context
+    })
 #
 def register(request):
     if request.method == 'POST':

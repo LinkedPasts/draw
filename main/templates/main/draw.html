@@ -307,37 +307,37 @@
     mappy.addLayer(layer)
     'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
   }
-  styles = {
-    'marker_default': {
-      fillColor: "#ff0000",
-      color:"#ff0000",
-      radius:4,
-      weight:1,
-      fillOpacity:0.5,
-      opacity:0.5},
-    'marker_other': {
-      fillColor: "yellow",
-      color:"#ff0000",
-      radius:3,
-      weight:1,
-      fillOpacity:0.5,
-      opacity:0.5},
-    'marker_highlight': {
-      radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"},
-    'line_default':{
-      weight:3,
-      opacity:1,
-      color: "#00ccff"},
-    'line_highlight':{weight: 4, color:"yellow"},
-    'pgon_default':{
-      fillColor: "#ff0000",
-      color:"#fff",
-      weight:2,
-      fillOpacity:0.1,
-      opacity:1},
-    'pgon_highlight':{
-      fillOpacity:1,fillColor:"yellow",color:"#000"}
-  }
+  <!--styles = {-->
+    <!--'marker_default': {-->
+      <!--fillColor: "#ff0000",-->
+      <!--color:"#ff0000",-->
+      <!--radius:4,-->
+      <!--weight:1,-->
+      <!--fillOpacity:0.5,-->
+      <!--opacity:0.5},-->
+    <!--'marker_other': {-->
+      <!--fillColor: "yellow",-->
+      <!--color:"#ff0000",-->
+      <!--radius:3,-->
+      <!--weight:1,-->
+      <!--fillOpacity:0.5,-->
+      <!--opacity:0.5},-->
+    <!--'marker_highlight': {-->
+      <!--radius:10,fillOpacity:1,fillColor:"yellow",color:"#000"},-->
+    <!--'line_default':{-->
+      <!--weight:3,-->
+      <!--opacity:1,-->
+      <!--color: "#00ccff"},-->
+    <!--'line_highlight':{weight: 4, color:"yellow"},-->
+    <!--'pgon_default':{-->
+      <!--fillColor: "#ff0000",-->
+      <!--color:"#fff",-->
+      <!--weight:2,-->
+      <!--fillOpacity:0.1,-->
+      <!--opacity:1},-->
+    <!--'pgon_highlight':{-->
+      <!--fillOpacity:1,fillColor:"yellow",color:"#000"}-->
+  <!--}-->
   
   function styleFunc(feature){
     <!--console.log('in styleFunc()')-->

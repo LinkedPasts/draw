@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-{% load fontawesome %}
+{% load fontawesome_5 %}
 {% block content %}
 
 <div class="container">
@@ -22,9 +22,8 @@
       <tbody>
         <tr><td class="float-right pr-3 strong">Username</td><td>{{ user_form.username.value }}</td></tr>
         <tr>
-          <td class="float-right pr-3 strong">Name</td>
-          <td>{% if user.profile.user_type == 'individual' %}{{ user_form.first_name }} {{ user_form.last_name }}
-              {% else %} {{ profile_form.name }} {% endif %}</td></tr>
+          <td class="float-right pr-3 strong">Full name</td>
+          <td>{{ profile_form.name }}</td></tr>
         <tr>
           <td class="float-right pr-3 strong">Email</td>
           <td>{{ user_form.email }}</td></tr>

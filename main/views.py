@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.db.models import Q
@@ -10,7 +11,7 @@ from django.views.generic import (View, CreateView, DeleteView, ListView, Update
 
 import json, sys
 from .utils import myprojects
-from main.models import Project, Map, Feature
+from main.models import Project, Map, Feature, ProjectUser
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
 
 def download_project(request, *args, **kwargs):
@@ -157,10 +158,15 @@ class MapUpdateView(LoginRequiredMixin, UpdateView):
 
 @login_required
 def fetchProjects(request):
-    print('in fetchProject()', request.GET)
+    u=request.user
     result = {"projects":[], "maps":[]}
-    projects = Project.objects.all()
-    maps = Map.objects.filter(tiles=True)
+    if u.is_superuser:
+        projects = Project.objects.all()
+    else:
+        collab_projects = ProjectUser.objects.filter(user=u).values_list('project',flat=True)
+        projects = Project.objects.filter( Q(id__in=collab_projects) | Q(owner=u) )
+    #maps = Map.objects.filter(tiles=True)
+    maps = Map.objects.filter(tiles=True,project__in=projects)
     for p in projects:
         result['projects'].append(
             {'id':p.id, 'owner':p.owner_id, 'label':p.label, 'title':p.title}

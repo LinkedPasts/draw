@@ -16,6 +16,16 @@ class Project(models.Model):
     uri = models.URLField(blank=True, null=True)
     create_date = models.DateTimeField(null=True, auto_now_add=True)
 
+    @property
+    def collab(self):
+        projusers=ProjectUser.objects.filter(project_id = self.id)
+        collabs=[]
+        for pu in projusers:
+            u = get_object_or_404(User, id=pu.user_id)
+            #r = pu.role
+            collabs.append(u)
+        return collabs
+
     #@property
     #def placetypes(self):
         #ppts=ProjectPlacetype.objects.filter(project_id = self.id)
