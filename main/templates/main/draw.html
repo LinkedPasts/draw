@@ -93,20 +93,26 @@
               <input type="radio" name="scope" value="this"> This map (<span class="cnt-this font-italic"></span>)
             </label>
           </div>
-          <div class="sectionheader">FEATURE TYPES</div>
-          <div id="r1" class="radio">
-            <label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>
-          <div id="r2" class="radio">
-            <label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>
-          <div id="r3" class="radio">
-            <label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch. site</label></div>
-          <div id="r4" class="radio">
-            <label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>
-          <div id="r5" class="radio">
-            <label><input type="radio" name="placetype" value="300000774"> province</label></div>
-          <div id="r6" class="radio">
-            <label><input type="radio" name="placetype" value="300387171"> ethnic group</label></div>
+          <!--<p class="sectionheader mt-2">FEATURE TYPES</p>-->
+          <div id="placetypes"> 
+            <!--<div class="checkbox">-->
+              <!--<label><input type="checkbox" name="placetype" value="300008347" checked> settlement</label></div>-->
+            <!--<div class="checkbox">-->
+              <!--<label><input type="checkbox" name="placetype" value="300000810"> archaeological site</label></div>-->
+          </div>
         </div> <!-- tab_bench -->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>-->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>-->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch. site</label></div>-->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>-->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300000774"> province</label></div>-->
+<!--<div class="radio">-->
+  <!--<label><input type="radio" name="placetype" value="300387171"> ethnic group</label></div>-->
         <div id="tab_unk" class="tab-pane fade" role="tabpanel">
           <div class="sectionheader">what goes here?</div>
         </div>
@@ -128,6 +134,14 @@
 </div>
 
 <script type="text/javascript">
+  function buildTypesList(objarr) {
+    console.log(objarr)
+    $("#placetypes").append('<p class="sectionheader mt-2">FEATURE TYPES</p>');
+    for(var i in objarr) {
+      $("#placetypes").append('<div class="checkbox"><label><input type="checkbox" name="placetype" value="'+objarr[i].identifier+'"> '+objarr[i].sourceLabel+'</label></div>')
+    }
+    $('input[type=checkbox][name=placetype]')[0].checked='checked'
+  }
   $(function(){
     flag = false;
     // assign variables to some elements
@@ -166,6 +180,8 @@
       maps = projdata.maps.filter(function (el) {
         return el.proj_label == proj;
       });
+      placetypes = projdata.projects.find(o =>o.label===proj).placetypes
+      buildTypesList(placetypes)
       <!--console.log('maps',maps)-->
       $(map_select).append('<option value="0">Select a map</option>')
       $.each(maps, function (i, map) {
@@ -519,10 +535,11 @@
   // create json feature in db
   function createFeature(feat){
     <!--console.log('feat in createFeature()',feat)-->
+    
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
     formData.append('mapid', $("#map_select").val())
-    formData.append('placetypes', $("input[ftype]:checked").val())
+    formData.append('placetypes', 'in the jsonb for now')
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
 
@@ -560,8 +577,9 @@
       e = event
       <!--console.log('name_list, CREATED event',name_list,e)-->
       layer_type = e.layerType
-      // get current feature type
-      types = $("input[name=placetype]:checked").val().split(',')
+      // get current feature type(s)
+      <!--types = $('input[x``type=checkbox][name=placetype]:checked')-->
+      <!--types = $("input[name=placetype]:checked").val().split(',')-->
       window.drawnlayer = event.layer;
       <!--console.log('drawnlayer,ftype',drawnlayer,ftype)-->
       drawnlayer.bindPopup(popupNewForm)
@@ -591,8 +609,13 @@
           feat['properties']['names'].push({"toponym":n});
         })
         // identifier, label, sourceLabels, when
-        types.forEach(function(t){
-          feat['properties']['types'].push({"identifier":t})
+        // find(o =>o.label===proj)
+        checked = $('input[type=checkbox][name=placetype]:checked')
+        types_arr = []
+        for (var i=0; i<checked.length; i++){types_arr.push(checked[i].value)}
+        console.log('creating feature types_arr[]',types_arr)
+        types_arr.forEach(function(t){
+          feat['properties']['types'].push(placetypes.find(o =>o.identifier==t))
         })
         <!--if(map.when_constant){console.log(map.when)}-->
         mapobj = maps.find( ({ id }) => id === mapid )
@@ -601,8 +624,8 @@
         
         <!--console.log('props',feat['properties']);-->
         drawnlayer.unbindPopup()
-        mappy.closePopup()        
-        drawnlayer.bindPopup('names: '+names+' types: '+types)
+        mappy.closePopup()
+        drawnlayer.bindPopup('names: '+names+' types: '+types_arr)
         //             
         <!--console.log('written feature',feat)-->
         // write a Feature instance to db
