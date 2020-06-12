@@ -144,7 +144,7 @@ class Placetype(models.Model):
 # placetypes designated per project
 class ProjectPlacetype(models.Model):
     project = models.ForeignKey(Project,default=-1, on_delete=models.CASCADE)    
-    placetype = models.ForeignKey(Placetype,default=-1, to_field='aat_id', on_delete=models.CASCADE)
+    aattype = models.ForeignKey(Placetype,default=-1, to_field='aat_id', on_delete=models.CASCADE)
     # placetype label used in source
     source_label = models.CharField(max_length=100)
  

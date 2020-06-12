@@ -79,15 +79,19 @@
           <a class="nav-link p-2 active" href="#tab_bench">Workbench</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link p-2" href="#tab_stats">Stats</a>
+          <a class="nav-link p-2 disabled" href="#tab_unk">??</a>
         </li>
       </ul>
       <div class="tab-content" id="myTabContent">
         <div id="tab_bench" class="tab-pane fade show active" role="tabpanel">
           <div id="scope_btns" class="my-2 hidden">
-            <div class="sectionheader">DISPLAYED FEATURES</div>
-            <label class="radio-inline mr-2"><input type="radio" name="scope" value="all" checked> All maps</label>
-            <label class="radio-inline"><input type="radio" name="scope" value="this"> This map</label>
+            <div class="sectionheader">DISPLAYED FEATURES (<i>count</i>)</div>
+            <label class="radio-inline mr-2">
+              <input type="radio" name="scope" value="all" checked> All maps (<span class="cnt-all font-italic"></span>)
+            </label><br/>
+            <label class="radio-inline">
+              <input type="radio" name="scope" value="this"> This map (<span class="cnt-this font-italic"></span>)
+            </label>
           </div>
           <div class="sectionheader">FEATURE TYPES</div>
           <div id="r1" class="radio">
@@ -103,46 +107,47 @@
           <div id="r6" class="radio">
             <label><input type="radio" name="placetype" value="300387171"> ethnic group</label></div>
         </div> <!-- tab_bench -->
-        <div id="tab_stats" class="tab-pane fade" role="tabpanel">
-          <div class="sectionheader">TO DATE</div>
-          <table class="table table-striped table-sm">
-            <thead class="thead-light">
-              <tr>
-                <th>type</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>settlement</td>
-                <td>452</td>
-              </tr>
-              <tr>
-                <td>province</td>
-                <td>35</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="sectionheader">THIS SESSION</div>
-          <table class="table table-striped table-sm">
-            <thead class="thead-light">
-              <tr>
-                <th>type</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>settlement</td>
-                <td>12</td>
-              </tr>
-              <tr>
-                <td>province</td>
-                <td>0</td>
-              </tr>
-            </tbody>
-          </table>        
-          </div>
+        <div id="tab_unk" class="tab-pane fade" role="tabpanel">
+          <div class="sectionheader">what goes here?</div>
+          <!--<div class="sectionheader">TO DATE</div>-->
+          <!--<table class="table table-striped table-sm">-->
+            <!--<thead class="thead-light">-->
+              <!--<tr>-->
+                <!--<th>type</th>-->
+                <!--<th>count</th>-->
+              <!--</tr>-->
+            <!--</thead>-->
+            <!--<tbody>-->
+              <!--<tr>-->
+                <!--<td>settlement</td>-->
+                <!--<td>452</td>-->
+              <!--</tr>-->
+              <!--<tr>-->
+                <!--<td>province</td>-->
+                <!--<td>35</td>-->
+              <!--</tr>-->
+            <!--</tbody>-->
+          <!--</table>-->
+          <!--<div class="sectionheader">THIS SESSION</div>-->
+          <!--<table class="table table-striped table-sm">-->
+            <!--<thead class="thead-light">-->
+              <!--<tr>-->
+                <!--<th>type</th>-->
+                <!--<th>count</th>-->
+              <!--</tr>-->
+            <!--</thead>-->
+            <!--<tbody>-->
+              <!--<tr>-->
+                <!--<td>settlement</td>-->
+                <!--<td>12</td>-->
+              <!--</tr>-->
+              <!--<tr>-->
+                <!--<td>province</td>-->
+                <!--<td>0</td>-->
+              <!--</tr>-->
+            <!--</tbody>-->
+          <!--</table>        -->
+          <!--</div>-->
         </div>
         <hr/>
         <!--<form>-->
@@ -309,7 +314,10 @@
     mappy.addLayer(layer)
     'zoom' in layer.options?mappy.setView(bounds.getCenter(), layer.options.zoom):mappy.fitBounds(bounds)
   }
- 
+  function calcCounts(){
+    $(".cnt-all").html(drawnFeatures.length)
+    $(".cnt-this").html(drawnFeatures.length-others.length)
+  }
   function styleFunc(feature){
     <!--console.log('in styleFunc()')-->
     markerStyle =  {
@@ -400,6 +408,9 @@
         mappy.fitBounds(features.getBounds())
       }
     }
+    // count of features per project, map
+    calcCounts()
+    
     <!--spinner.stop()-->
   }
   function clearMap(){
@@ -510,6 +521,7 @@
           console.log('deleteFeature() result',JSON.stringify(result))
         }
       })
+    calcCounts()
   }
 
   // updates json feature in drawnFeatures and db on EDITED
@@ -573,6 +585,7 @@
         <!--console.log('data returned from createFeature()',result)-->
       }   
     })
+    calcCounts()
   };
    
   function map_init (map, options) {
