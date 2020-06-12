@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
-from django.http import HttpResponse, JsonResponse, FileResponse
+from django.http import JsonResponse, FileResponse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -11,7 +11,7 @@ from django.views.generic import (View, CreateView, DeleteView, ListView, Update
 
 import json, sys
 from .utils import myprojects
-from main.models import Project, Map, Feature, ProjectUser
+from main.models import Project, Map, Feature, ProjectUser, Placetype, ProjectPlacetype, MapPlacetype
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
 
 def download_project(request, *args, **kwargs):
@@ -170,9 +170,13 @@ def fetchProjects(request):
     #feature_count = sum([m.features.count() for m in maps])
     for p in projects:
         count=sum([m.features.count() for m in p.maps.all()])
+        #ppt=ProjectPlacetype.objects.filter(project=p).values_list('aattype',flat=True)
+        ppt=ProjectPlacetype.objects.filter(project=p)
+        #aat=Placetype.objects.filter(aat_id__in=ppt)
+        placetypes=[ t.as_dict() for t in ppt ]
         result['projects'].append(
             {'id':p.id, 'owner':p.owner_id, 'label':p.label, 'title':p.title
-            ,'feature_count':count}
+            ,'feature_count':count, 'placetypes': placetypes}
         )
     for m in maps:
         result['maps'].append(
@@ -241,7 +245,7 @@ def createFeature(request):
         newfeat = Feature(
             user = request.user,
             name = names[0]['toponym'],
-            placetype = types[0]['label'],
+            placetype = types[0]['identifier'],
             jsonb = feature,
             map = mapobj,
             geom_point = GEOSGeometry(json.dumps(feature['geometry'])) if ftype == 'Point' else None,

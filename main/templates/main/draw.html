@@ -109,45 +109,6 @@
         </div> <!-- tab_bench -->
         <div id="tab_unk" class="tab-pane fade" role="tabpanel">
           <div class="sectionheader">what goes here?</div>
-          <!--<div class="sectionheader">TO DATE</div>-->
-          <!--<table class="table table-striped table-sm">-->
-            <!--<thead class="thead-light">-->
-              <!--<tr>-->
-                <!--<th>type</th>-->
-                <!--<th>count</th>-->
-              <!--</tr>-->
-            <!--</thead>-->
-            <!--<tbody>-->
-              <!--<tr>-->
-                <!--<td>settlement</td>-->
-                <!--<td>452</td>-->
-              <!--</tr>-->
-              <!--<tr>-->
-                <!--<td>province</td>-->
-                <!--<td>35</td>-->
-              <!--</tr>-->
-            <!--</tbody>-->
-          <!--</table>-->
-          <!--<div class="sectionheader">THIS SESSION</div>-->
-          <!--<table class="table table-striped table-sm">-->
-            <!--<thead class="thead-light">-->
-              <!--<tr>-->
-                <!--<th>type</th>-->
-                <!--<th>count</th>-->
-              <!--</tr>-->
-            <!--</thead>-->
-            <!--<tbody>-->
-              <!--<tr>-->
-                <!--<td>settlement</td>-->
-                <!--<td>12</td>-->
-              <!--</tr>-->
-              <!--<tr>-->
-                <!--<td>province</td>-->
-                <!--<td>0</td>-->
-              <!--</tr>-->
-            <!--</tbody>-->
-          <!--</table>        -->
-          <!--</div>-->
         </div>
         <hr/>
         <!--<form>-->
@@ -656,7 +617,7 @@
 
       // leaflet_id of clicked layer 
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      console.log('layerid',layerid)
+      <!--console.log('layerid',layerid)-->
 
       // no feat object? get it
       if (typeof feat == 'undefined' || flag == true) {
@@ -665,12 +626,12 @@
         console.log('new feat',feat)
       }
       
-      console.log('feat coords before',feat.geometry.coordinates)
+      <!--console.log('feat coords before',feat.geometry.coordinates)-->
       // get new geometry
       newgeom = drawnLayers._layers[layerid].toGeoJSON().geometry
       // replace in feat
       feat.geometry = newgeom
-      console.log('feat coords after',feat.geometry.coordinates)
+      <!--console.log('feat coords after',feat.geometry.coordinates)-->
       
       // update database 
       updateFeature(feat)
@@ -683,7 +644,7 @@
       e = event
       console.log('DELETED event',e)
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      console.log('layerid',layerid)
+      <!--console.log('layerid',layerid)-->
 
       // strip it from json
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
@@ -697,10 +658,10 @@
       if (typeof feat == 'undefined') {
         feat = e.layers._layers[layerid].feature
         lid = feat.properties.leaflet_id
-        console.log('no feat, made one:lid,fid',lid, feat,feat.fid)
+        <!--console.log('no feat, made one:lid,fid',lid, feat,feat.fid)-->
       } else {
         lid = feat.properties.leaflet_id
-        console.log('yes, a feat-lid:',lid)
+        <!--console.log('yes, a feat-lid:',lid)-->
       }
       deleteFeature(lid)
       
@@ -741,3 +702,43 @@
     
 </script>
 {% endblock %}
+
+          <!--<div class="sectionheader">TO DATE</div>-->
+          <!--<table class="table table-striped table-sm">-->
+            <!--<thead class="thead-light">-->
+              <!--<tr>-->
+                <!--<th>type</th>-->
+                <!--<th>count</th>-->
+              <!--</tr>-->
+            <!--</thead>-->
+            <!--<tbody>-->
+              <!--<tr>-->
+                <!--<td>settlement</td>-->
+                <!--<td>452</td>-->
+              <!--</tr>-->
+              <!--<tr>-->
+                <!--<td>province</td>-->
+                <!--<td>35</td>-->
+              <!--</tr>-->
+            <!--</tbody>-->
+          <!--</table>-->
+          <!--<div class="sectionheader">THIS SESSION</div>-->
+          <!--<table class="table table-striped table-sm">-->
+            <!--<thead class="thead-light">-->
+              <!--<tr>-->
+                <!--<th>type</th>-->
+                <!--<th>count</th>-->
+              <!--</tr>-->
+            <!--</thead>-->
+            <!--<tbody>-->
+              <!--<tr>-->
+                <!--<td>settlement</td>-->
+                <!--<td>12</td>-->
+              <!--</tr>-->
+              <!--<tr>-->
+                <!--<td>province</td>-->
+                <!--<td>0</td>-->
+              <!--</tr>-->
+            <!--</tbody>-->
+          <!--</table>        -->
+          <!--</div>-->
