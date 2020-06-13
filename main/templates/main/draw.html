@@ -77,10 +77,10 @@
       <div id="tabstuff" class="hidden">
       <ul id="draw_tabs_ul" class="nav nav-tabs">
         <li class="nav-item">
-          <a class="nav-link p-2 active" href="#tab_bench">Workbench</a>
+          <a class="nav-link p-2 active" href="#tab_bench">{% fa5_icon 'cogs' 'fas' %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link p-2 disabled" href="#tab_unk">{% fa5_icon 'ban' 'fas' %}</a>
+          <a class="nav-link p-2" href="#download">downloads {% fa5_icon 'file-download' 'fas' %}</a>
         </li>
       </ul>
       <div id="tab_content" class="tab-content">
@@ -95,20 +95,16 @@
             </label>
           </div>
           <!--<p class="sectionheader mt-2">FEATURE TYPES</p>-->
-          <div id="placetypes"> 
-            <!--<div class="checkbox">-->
-              <!--<label><input type="checkbox" name="placetype" value="300008347" checked> settlement</label></div>-->
-            <!--<div class="checkbox">-->
-              <!--<label><input type="checkbox" name="placetype" value="300000810"> archaeological site</label></div>-->
-          </div>
+          <div id="placetypes"></div>
         </div> <!-- tab_bench -->
-        <div id="tab_unk" class="tab-pane fade" role="tabpanel">
-          <div class="sectionheader">what goes here?</div>
+        <div id="download" class="tab-pane fade options" role="tabpanel">
+          <div class="sectionheader">all project features</div>
+            <p><a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>
         </div>
         <hr/>
-        <div id="download" class="options hidden" align="center">
-          <p>download <a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>
-        </div>      
+        <!--<div id="download" class="options hidden" align="center">-->
+          <!--<p>download <a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>-->
+        <!--</div>      -->
       </div>
       </div> <!-- tabstuff-->
     </div> <!-- sidebar -->
@@ -181,6 +177,7 @@
             text : map.label 
         }));
       });
+      <!--loadGeodata(map.proj_id,mapid)-->
       div_map_select.show(400)
       tabstuff.show(400)
     })
@@ -332,8 +329,8 @@
           name = feature.properties.names[0]['toponym']
           placetype = feature.properties.placetype
           <!--console.log('matchid',matchid)-->
-          marker = L.circleMarker(latlng).bindPopup(
-            'id: '+fid+'<br/>'+'name: '+name+'<br/>'+'type: '+placetype);
+          marker = L.circleMarker(latlng)
+          <!--.bindPopup('id: '+fid+'<br/>'+'name: '+name+'<br/>'+'ptype: '+placetype);-->
           idToFeature[fid] = marker
           return marker
         }
@@ -345,7 +342,7 @@
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
           l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
-            f.properties.types);
+            f.properties.types[0]['sourceLabel']);
           identifier = f.fid;
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
