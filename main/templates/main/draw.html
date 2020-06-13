@@ -107,11 +107,7 @@
         </div>
         <hr/>
         <div id="download" class="options hidden" align="center">
-          <p><a id="dl_csv" href="">download csv</a></p>
-          <!--<button data-format="csv" type="button" class="bg-success btn btn-secondary btn-sm">-->
-            <!--CSV { fa5_icon 'file-download' 'fas' %}</button>-->
-          <!--<button data-format="lpf" type="button" class="bg-success btn btn-secondary btn-sm">-->
-            <!--LPF { fa5_icon 'file-download' 'fas' %}</button>-->
+          <p>download <a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>
         </div>      
       </div>
       </div> <!-- tabstuff-->
@@ -165,6 +161,7 @@
       proj = $(this).val()
       // pass to download link(s)
       $("#dl_csv").attr('href','dl_project/'+proj+'/csv')
+      $("#dl_lpf").attr('href','dl_project/'+proj+'/lpf')
       <!--console.log('proj: '+proj)-->
       clearMap()
       // clear options

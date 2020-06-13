@@ -10,9 +10,12 @@ django-six==1.0.4
 djangorestframework==3.11.0
 djangorestframework-datatables==0.5.1
 geojson==2.5.0
+numpy==1.18.5
 psycopg2==2.8.4
 pytz==2019.3
 PyYAML==5.3
+reverse-geocoder==1.5.1
+scipy==1.4.1
 screen==1.0.1
 six==1.14.0
 sqlparse==0.3.0

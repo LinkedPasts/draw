@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views.generic import (View, CreateView, DeleteView, ListView, UpdateView)
 
 import json, sys, time, datetime, csv, os
+import reverse_geocoder as rg
 from .utils import myprojects
 from main.models import Project, Map, Feature, ProjectUser, Placetype, ProjectPlacetype, MapPlacetype
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
@@ -301,40 +302,36 @@ def download_project(request, *args, **kwargs):
     return response
   elif req_format == 'lpf':
     print('returning Linked Places json')    
-    ## make file name
-    #fn = 'media/user_'+user+'/'+ds.label+'_aug_'+date+'.json'
 
-    #with open(fn, 'w', encoding='utf-8') as outfile:
-      #fcoll = {"type":"FeatureCollection","features":[]}
-      #for f in features:
-        #feat={"type":"Feature",
-                      #"properties":{
-                #"@id":f.dataset.uri_base+f.src_id,
-                  #"src_id":f.src_id,
-                #"title":f.title,
-                #"whg_pid":f.id}}
-        #if len(f.geoms.all()) >1:
-          #feat['geometry'] = {'type':'GeometryCollection'}
-          #feat['geometry']['geometries'] = [g.jsonb for g in f.geoms.all()]
-        #elif len(f.geoms.all()) == 1:
-          #feat['geometry'] = f.geoms.first().jsonb
-        #else: # no geoms
-          #feat['geometry'] = feat['geometry'] = {'type':'GeometryCollection','geometries':[]}
-        #feat['names'] = [n.jsonb for n in f.names.all()]
-        #feat['types'] = [t.jsonb for t in f.types.all()]
-        #feat['when'] = [w.jsonb for w in f.whens.all()]
-        #feat['relations'] = [r.jsonb for r in f.related.all()]
-        #feat['links'] = [l.jsonb for l in f.links.all()]
-        #feat['descriptions'] = [des.jsonb for des in f.descriptions.all()]
-        #feat['depictions'] = [dep.jsonb for dep in f.depictions.all()]
-        #fcoll['features'].append(feat)  
-      #outfile.write(json.dumps(fcoll,indent=2))
+    # make file name
+    fn = 'media/downloads/'+projlabel+'_'+user+'_'+date+'.json'
 
-    ## response is reopened file
-    #response = FileResponse(open(fn, 'rb'), content_type='text/json')
-    #response['Content-Disposition'] = 'attachment; filename="'+os.path.basename(fn)+'"'
+    with open(fn, 'w', encoding='utf-8') as outfile:
+      fcoll = {"type":"FeatureCollection","features":[]}
+      for f in qs:
+        props = f.jsonb['properties']
+        g = f.jsonb['geometry']
+        coords = g['coordinates']
+        ccodes = list(set([rg.search(c)[0]['cc'] for c in coords])) if len(coords)>2 else [rg.search(coords)[0]['cc']]
+        feat={"type": "Feature",
+          "@id":"http://whgazetteer.org/api/places/"+projlabel+"/"+str(f.id),          
+          "properties":{
+            "src_id":f.id,
+            "title":f.name,
+            'ccodes':ccodes
+          }}
+        # TODO: after whg accepts single geometries, refactor here
+        feat['geometry'] = {'type':'GeometryCollection','geometries':[g]}
+        feat['names'] = props['names']
+        feat['types'] = props['types']        
+        fcoll['features'].append(feat)  
+      outfile.write(json.dumps(fcoll,indent=2))
 
-    #return response
+    # response is reopened file
+    response = FileResponse(open(fn, 'rb'), content_type='text/json')
+    response['Content-Disposition'] = 'attachment; filename="'+os.path.basename(fn)+'"'
+
+    return response
 
 def maketime():
   ts = time.time()
