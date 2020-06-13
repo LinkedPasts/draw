@@ -19,5 +19,8 @@ urlpatterns = [
     path('feature_delete/', views.deleteFeature, name='feature-delete'),
     path('feature_update/', views.updateFeature, name='feature-update'),
     
+    path('dl_project/<str:prj>/<str:format>', views.download_project, name="dl-project"), # 
+    #path('dl_map/<int:id>/<str:format>', views.download_map, name="dl-map"), # 
+    
 ]
 # + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

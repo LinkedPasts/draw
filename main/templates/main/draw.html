@@ -106,11 +106,13 @@
           <div class="sectionheader">what goes here?</div>
         </div>
         <hr/>
-        <div class="options" align="center">
-          <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
-            Download {% fa5_icon 'file-download' 'fas' %}</button>
+        <div id="download" class="options hidden" align="center">
+          <p><a id="dl_csv" href="">download csv</a></p>
+          <!--<button data-format="csv" type="button" class="bg-success btn btn-secondary btn-sm">-->
+            <!--CSV { fa5_icon 'file-download' 'fas' %}</button>-->
+          <!--<button data-format="lpf" type="button" class="bg-success btn btn-secondary btn-sm">-->
+            <!--LPF { fa5_icon 'file-download' 'fas' %}</button>-->
         </div>      
-        <!--<p><a href="{ url ':dl-project' id=projid %}"></p>-->
       </div>
       </div> <!-- tabstuff-->
     </div> <!-- sidebar -->
@@ -126,6 +128,10 @@
     }
     $('input[type=checkbox][name=placetype]')[0].checked='checked'
   }
+  $(".btn").on('click',function(e){
+    console.log('clicked this',$(this).data('format'))
+    
+  })
   $(function(){
     flag = false;
     // assign variables to some elements
@@ -157,6 +163,8 @@
     project_select.on('change',function(){
       <!--projid = parseInt($(this).val())-->
       proj = $(this).val()
+      // pass to download link(s)
+      $("#dl_csv").attr('href','dl_project/'+proj+'/csv')
       <!--console.log('proj: '+proj)-->
       clearMap()
       // clear options
@@ -188,6 +196,7 @@
       }
       $("#scope_btns").removeClass('hidden')
       $("#slider").removeClass('hidden')
+      $("#download").removeClass('hidden')
       clearMap()
       mapid = parseInt($(this).val())
       maplabel = parseInt($(this).text())

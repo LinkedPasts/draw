@@ -150,7 +150,7 @@ class ProjectPlacetype(models.Model):
 
   def as_dict(self):
     return {
-      "identifier": self.aattype_id,
+      "identifier": "aat:"+str(self.aattype_id),
       "label": self.aat_term,
       "sourceLabel": self.source_label
     }
