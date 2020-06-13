@@ -51,15 +51,15 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
 # Linked Places record
 # not operational
-#class LPViewSet(viewsets.ModelViewSet):
-    #queryset = Feature.objects.all()
-    #serializer_class = FeatureSerializer
-    #permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+class LPViewSet(viewsets.ModelViewSet):
+    queryset = Feature.objects.all()
+    serializer_class = FeatureSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     
-    #def get_queryset(self):
-        #projid = self.request.GET.get('proj')
+    def get_queryset(self):
+        projid = self.request.GET.get('projid')
         #mapid = self.request.GET.get('mapid')
-        #mapIds = Map.objects.values('id').filter(project = projid)
-        #qs = Feature.objects.filter(id__in=mapIds)
-        ##print('qs count',qs.count())
-        #return qs
+        mapIds = Map.objects.values('id').filter(project = projid)
+        qs = Feature.objects.filter(map__in=mapIds)
+        #print('qs count',qs.count())
+        return qs

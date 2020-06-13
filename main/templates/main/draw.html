@@ -58,7 +58,7 @@
   <div class="row">
     <div id="map">{% leaflet_map "map_home" callback="map_init" %}
     <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
-    <div id="sidebar" class="">
+    <div id="sidebar">
       <div class="form-group">
         <h5>Project {{ projid }}</h5> 
           <select id="project_select" class="form-control custom-select-sm">
@@ -74,15 +74,16 @@
       <p id="map_title"></p>
       <hr/>
       <!-- tabs here -->
+      <div id="tabstuff" class="hidden">
       <ul id="draw_tabs_ul" class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link p-2 active" href="#tab_bench">Workbench</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link p-2 disabled" href="#tab_unk">??</a>
+          <a class="nav-link p-2 disabled" href="#tab_unk">{% fa5_icon 'ban' 'fas' %}</a>
         </li>
       </ul>
-      <div class="tab-content" id="myTabContent">
+      <div id="tab_content" class="tab-content">
         <div id="tab_bench" class="tab-pane fade show active" role="tabpanel">
           <div id="scope_btns" class="my-2 hidden">
             <div class="sectionheader">DISPLAYED FEATURES (<i>count</i>)</div>
@@ -101,34 +102,17 @@
               <!--<label><input type="checkbox" name="placetype" value="300000810"> archaeological site</label></div>-->
           </div>
         </div> <!-- tab_bench -->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300008347" checked> settlement</label></div>-->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300000810"> archaeological site</label></div>-->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300008347,300000810"> settlement/arch. site</label></div>-->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300386176"> dynasty</label></div>-->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300000774"> province</label></div>-->
-<!--<div class="radio">-->
-  <!--<label><input type="radio" name="placetype" value="300387171"> ethnic group</label></div>-->
         <div id="tab_unk" class="tab-pane fade" role="tabpanel">
           <div class="sectionheader">what goes here?</div>
         </div>
         <hr/>
-        <!--<form>-->
-          <!--<div class="form-group">-->
-            <!--<label for="tags">Tags</label>-->
-            <!--<input type="text" class="form-control" id="tags">-->
-          <!--</div>-->
-        <!--</form>    -->
         <div class="options" align="center">
           <button id="btn_download" type="button" class="bg-success btn btn-secondary btn-sm">
             Download {% fa5_icon 'file-download' 'fas' %}</button>
         </div>      
         <!--<p><a href="{ url ':dl-project' id=projid %}"></p>-->
       </div>
+      </div> <!-- tabstuff-->
     </div> <!-- sidebar -->
   </div>
 </div>
@@ -148,6 +132,7 @@
     project_select = $("#project_select")
     map_select = $("#map_select")
     div_map_select = $("#div_map_select")
+    tabstuff = $("#tabstuff")
     scope_btns = $('input[type=radio][name=scope]')
     poly = true
 
@@ -192,6 +177,7 @@
         }));
       });
       div_map_select.show(400)
+      tabstuff.show(400)
     })
     
     // clear current, load tileset
@@ -349,10 +335,11 @@
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
           <!--console.log('f,l in renderMap()',f,l)-->
+          // TODO: handle multiple names, types
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
           l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
-            f.properties.types[0]['identifier']);
+            f.properties.types);
           identifier = f.fid;
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
@@ -613,7 +600,7 @@
         checked = $('input[type=checkbox][name=placetype]:checked')
         types_arr = []
         for (var i=0; i<checked.length; i++){types_arr.push(checked[i].value)}
-        console.log('creating feature types_arr[]',types_arr)
+        <!--console.log('creating feature types_arr[]',types_arr)-->
         types_arr.forEach(function(t){
           feat['properties']['types'].push(placetypes.find(o =>o.identifier==t))
         })
