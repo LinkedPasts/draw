@@ -228,21 +228,6 @@
   }
   // load data on change of map selector
   function loadGeodata(proj_id,map_id) {
-    $.get('/names', {mapid: map_id},
-      function(names){
-        <!--console.log('loadGeodata() names', names)-->
-        name_list = []
-        names_html = ''
-        for (var i = 0; i < names.length; i++){
-          name_list.push(names[i])
-          names_html+=names[i]+'; '
-        }
-        $('#names').html(names_html)
-        $("#names_in").autocomplete({
-          source: name_list
-        });
-      }
-    )
     <!--console.log('in loadGeodata: proj_id, mapid',proj_id,map_id)-->
     $.get("/api/geoms", {projid: proj_id, mapid: map_id },
       function(data){
@@ -337,12 +322,19 @@
         ,style: styleFunc
         ,onEachFeature: function(feature,layer) {
           f=feature; l=layer;
+          name_arr = f.properties.names
+          type_arr = f.properties.types
           <!--console.log('f,l in renderMap()',f,l)-->
           // TODO: handle multiple names, types
+          names=[]; types=[]
+          for(n in name_arr){names.push(name_arr[n].toponym)}
+          for(t in type_arr){types.push(type_arr[t].sourceLabel)}
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
-          l.bindPopup('id: '+f.fid+'<br/>'+'name: '+f.properties.names[0]['toponym']+'<br/>'+'type: '+
-            f.properties.types[0]['sourceLabel']);
+          <!--poppy = new L.popup({offset: [0, -30]})-->
+          <!--poppy.setContent('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): '+names+'<br/>'+'type(s): '+types+'</p>')-->
+          l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): '+names+'<br/>'+'type(s): '+types+'</p>');
+          <!--l.bindPopup(poppy);-->
           identifier = f.fid;
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
@@ -444,32 +436,12 @@
     '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" class="ui-autocomplete-input" autocomplete=on></p> \
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
       Save it</button></p></form></div>';
-  function toWKT(layer) {
-      var lng, lat, coords = [];
-      if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
-          var latlngs = layer.getLatLngs();
-          for (var i = 0; i < latlngs.length; i++) {
-              latlngs[i]
-              coords.push(latlngs[i].lng + " " + latlngs[i].lat);
-              if (i === 0) {
-                  lng = latlngs[i].lng;
-                  lat = latlngs[i].lat;
-              }
-      };
-          if (layer instanceof L.Polygon) {
-              return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
-          } else if (layer instanceof L.Polyline) {
-              return "LINESTRING(" + coords.join(",") + ")";
-          }
-      } else if (layer instanceof L.Marker) {
-          return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
-      }
-  }
   <!--<p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\-->
   function popupEditForm(feat) {
+    console.log('popup names',f['properties']['names'])
     html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
-      name="names" value="'+feat['properties']['names']+'"></p> \
-      <input type="text" name="lid" value="'+feat['properties']['leaflet_id']+'">\
+      name="names" value="'+f['properties']['names']+'"></p> \
+      <input type="hidden" name="lid" value="'+f['properties']['leaflet_id']+'">\
       </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
       Save</button></p></div>';
     return html;
@@ -567,16 +539,18 @@
       e = event
       <!--console.log('name_list, CREATED event',name_list,e)-->
       layer_type = e.layerType
-      // get current feature type(s)
-      <!--types = $('input[x``type=checkbox][name=placetype]:checked')-->
-      <!--types = $("input[name=placetype]:checked").val().split(',')-->
       window.drawnlayer = event.layer;
-      <!--console.log('drawnlayer,ftype',drawnlayer,ftype)-->
-      drawnlayer.bindPopup(popupNewForm)
+      var options = {offset: [0, -30]}
+      <!--popnew.setContent(popupNewForm)-->
+      var popnew = L.popup(options)
+        .setContent(popupNewForm);
+        <!--drawnlayer.bindPopup(popupNewForm)-->
+      drawnlayer.bindPopup(popnew)
       drawnLayers.addLayer(drawnlayer)
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
       
+      // popup names field
       $("#names_in").focus()
 
       // make geojson immediately, add _leaflet_id
@@ -585,7 +559,7 @@
       feat['properties']['names'] = []
       feat['properties']['types'] = []
       feat['properties']['map_id'] = mapid
-      <!--console.log('CREATE feat -> drawnFeatures[]',feat)-->
+      <!--console.log('feat CREATED, pushed to drawnFeatures[]',feat)-->
       drawnFeatures.push(feat)
       
       // save it immediately      
@@ -630,7 +604,6 @@
 
       // leaflet_id of clicked layer 
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      <!--console.log('layerid',layerid)-->
 
       // no feat object? get it
       if (typeof feat == 'undefined' || flag == true) {
@@ -639,12 +612,10 @@
         console.log('new feat',feat)
       }
       
-      <!--console.log('feat coords before',feat.geometry.coordinates)-->
       // get new geometry
       newgeom = drawnLayers._layers[layerid].toGeoJSON().geometry
       // replace in feat
       feat.geometry = newgeom
-      <!--console.log('feat coords after',feat.geometry.coordinates)-->
       
       // update database 
       updateFeature(feat)
@@ -657,62 +628,48 @@
       e = event
       console.log('DELETED event',e)
       layerid = Number(Object.keys(e.layers._layers)[0]);
-      <!--console.log('layerid',layerid)-->
 
       // strip it from json
       drawnFeatures = $.grep(drawnFeatures, function(el,idx){
         return el.properties.leaflet_id != layerid;
       })
 
-      // what the FUCK is true right here????
-      <!--console.log('feat?',feat)-->
-      // deleting post-refresh feature: no; 
-      // deleting new feature: yes
       if (typeof feat == 'undefined') {
         feat = e.layers._layers[layerid].feature
         lid = feat.properties.leaflet_id
-        <!--console.log('no feat, made one:lid,fid',lid, feat,feat.fid)-->
       } else {
         lid = feat.properties.leaflet_id
-        <!--console.log('yes, a feat-lid:',lid)-->
       }
-      deleteFeature(lid)
-      
-      <!--if (typeof feat == 'undefined' || flag == true) {-->
-      <!--if (typeof feat == 'undefined') {-->
-        <!--feat = e.layers._layers[layerid].feature-->
-        <!--flag = true;-->
-        <!--console.log('feat leaflet_id',feat.properties.leaflet_id)-->
-        <!--<!--deleteFeature(feat.fid)-->-->
-        <!--deleteFeature(feat.properties.leaflet_id)-->
-      <!--} else {-->
-        <!--console.log('no fid yet')-->
-      <!--}-->
-      <!--console.log('feat',feat)-->
 
-      // need to delete it from db here
+      // delete it from db
+      deleteFeature(lid)
+
       drawnLayers.addTo(mappy);
     });
-    
-    <!--mappy.on(L.Draw.Event.DELETED, function (event) {-->
-      <!--<!--console.clear()-->-->
-      <!--e = event-->
-      <!--console.log('DELETED event',e)-->
-      <!--layerid = Number(Object.keys(e.layers._layers)[0]);-->
-            
-      <!--// db feature id of layer clicked-->
-      <!--fid = e.layers._layers[layerid].feature.fid-->
-      <!--console.log('mappy on DELETE fid',fid)-->
-      <!--// strip it from json-->
-      <!--drawnFeatures = $.grep(drawnFeatures, function(el,idx){-->
-        <!--return el.properties.leaflet_id != layerid;-->
-      <!--})-->
-      <!--// need to delete it from db here-->
-      <!--deleteFeature(fid)-->
-      <!--drawnLayers.addTo(mappy);-->
-    <!--});  -->
+
   }
-    
+ function toWKT(layer) {
+      var lng, lat, coords = [];
+      if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+          var latlngs = layer.getLatLngs();
+          for (var i = 0; i < latlngs.length; i++) {
+              latlngs[i]
+              coords.push(latlngs[i].lng + " " + latlngs[i].lat);
+              if (i === 0) {
+                  lng = latlngs[i].lng;
+                  lat = latlngs[i].lat;
+              }
+      };
+          if (layer instanceof L.Polygon) {
+              return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
+          } else if (layer instanceof L.Polyline) {
+              return "LINESTRING(" + coords.join(",") + ")";
+          }
+      } else if (layer instanceof L.Marker) {
+          return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
+      }
+  }
+     
 </script>
 {% endblock %}
 
@@ -755,3 +712,19 @@
             <!--</tbody>-->
           <!--</table>        -->
           <!--</div>-->
+
+    <!--$.get('/names', {mapid: map_id},-->
+      <!--function(names){-->
+        <!--<!--console.log('loadGeodata() names', names)-->-->
+        <!--name_list = []-->
+        <!--names_html = ''-->
+        <!--for (var i = 0; i < names.length; i++){-->
+          <!--name_list.push(names[i])-->
+          <!--names_html+=names[i]+'; '-->
+        <!--}-->
+        <!--$('#names').html(names_html)-->
+        <!--$("#names_in").autocomplete({-->
+          <!--source: name_list-->
+        <!--});-->
+      <!--}-->
+    <!--)-->
