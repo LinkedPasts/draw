@@ -96,15 +96,19 @@
           </div>
           <!--<p class="sectionheader mt-2">FEATURE TYPES</p>-->
           <div id="placetypes"></div>
+          <!--<hr/>-->
+          <!--<form>-->
+            <!--<div class="form-group">-->
+              <!--<label for="tags">Tags</label>-->
+              <!--<input type="text" class="form-control" id="tags">-->
+            <!--</div>-->
+          <!--</form>-->
         </div> <!-- tab_bench -->
         <div id="download" class="tab-pane fade options" role="tabpanel">
           <div class="sectionheader">all project features</div>
             <p><a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>
         </div>
         <hr/>
-        <!--<div id="download" class="options hidden" align="center">-->
-          <!--<p>download <a id="dl_csv" href="">csv</a>, <a id="dl_lpf" href="">lpf</a></p>-->
-        <!--</div>      -->
       </div>
       </div> <!-- tabstuff-->
     </div> <!-- sidebar -->
@@ -122,9 +126,40 @@
   }
   $(".btn").on('click',function(e){
     console.log('clicked this',$(this).data('format'))
-    
   })
   $(function(){
+  
+    // STUB autocomplete test  
+    availableTags = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+    $("#tags").autocomplete({
+          <!--source: name_list-->
+          source: availableTags
+    });
+    // end STUB
+    
     flag = false;
     // assign variables to some elements
     project_select = $("#project_select")
@@ -432,8 +467,14 @@
     baseLayers['OpenStreetmap'].addTo(mappy)
   }, false);
 
+  // <!--<form>-->
+            <!--<div class="form-group">-->
+              <!--<label for="tags">Tags</label>-->
+              <!--<input type="text" class="form-control" id="tags">-->
+            <!--</div>-->
+          <!--</form>-->
   popupNewForm =
-    '<div><form id="popupform"><p>Name(s): <input type="text" id="names_in" name="names" class="ui-autocomplete-input" autocomplete=on></p> \
+    '<div><form id="popupform" class="form-group"><p>Name(s): <input type="text" id="names_in" name="names" class="ui-autocomplete-input" autocomplete=on></p> <input type="text" class="form-control" id="tags">\
       <p><button id="btn_save" type="submit" class="btn btn-primary btn-sm"> \
       Save it</button></p></form></div>';
   <!--<p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\-->
@@ -546,12 +587,16 @@
         .setContent(popupNewForm);
         <!--drawnlayer.bindPopup(popupNewForm)-->
       drawnlayer.bindPopup(popnew)
+
       drawnLayers.addLayer(drawnlayer)
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
       
       // popup names field
       $("#names_in").focus()
+
+      $("#tags").autocomplete({source: availableTags});
+      console.log('input in DOM?',$("#tags"))
 
       // make geojson immediately, add _leaflet_id
       feat = drawnlayer.toGeoJSON()

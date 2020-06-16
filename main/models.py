@@ -88,6 +88,10 @@ class Feature(models.Model):
   geom_line = geo.LineStringField(blank=True, null=True)
   geom_poly = geo.PolygonField(blank=True, null=True)
 
+  def __str__(self):
+    #return self.name+'_'+str(self.id)
+    return self.name
+
   class Meta:
     managed = True
     db_table = 'features'    

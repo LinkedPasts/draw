@@ -49,7 +49,7 @@ header { border-bottom: 2px solid #e8e8e8; }
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 9999;
+  z-index: 999999;
   display: none;
   float: left;
   min-width: 160px;
@@ -96,3 +96,7 @@ header { border-bottom: 2px solid #e8e8e8; }
   position: absolute;
   width: 1px;
 }
+
+/*ui-menu,ui-widget ui-widget-content ui-autocomplete ui-front*/
+.ui-widget, 
+.ui-widget-content {z-index: 9999 !important;}
