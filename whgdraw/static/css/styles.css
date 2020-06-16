@@ -99,4 +99,4 @@ header { border-bottom: 2px solid #e8e8e8; }
 
 /*ui-menu,ui-widget ui-widget-content ui-autocomplete ui-front*/
 .ui-widget, 
-.ui-widget-content {z-index: 9999 !important;}
+.ui-widget-content {z-index: 9999 !important; font-family: 'Raleway', sans-serif; font-size:.8rem;}
