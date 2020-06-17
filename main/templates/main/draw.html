@@ -121,38 +121,6 @@
     console.log('clicked this',$(this).data('format'))
   })
   $(function(){
-  
-    <!--// STUB autocomplete test  -->
-    <!--availableTags = [-->
-      <!--"ActionScript",-->
-      <!--"AppleScript",-->
-      <!--"Asp",-->
-      <!--"BASIC",-->
-      <!--"C",-->
-      <!--"C++",-->
-      <!--"Clojure",-->
-      <!--"COBOL",-->
-      <!--"ColdFusion",-->
-      <!--"Erlang",-->
-      <!--"Fortran",-->
-      <!--"Groovy",-->
-      <!--"Haskell",-->
-      <!--"Java",-->
-      <!--"JavaScript",-->
-      <!--"Lisp",-->
-      <!--"Perl",-->
-      <!--"PHP",-->
-      <!--"Python",-->
-      <!--"Ruby",-->
-      <!--"Scala",-->
-      <!--"Scheme"-->
-    <!--];-->
-    <!--$("#tags").autocomplete({-->
-          <!--<!--source: name_list-->-->
-          <!--source: availableTags-->
-    <!--});-->
-    <!--// end STUB-->
-    
     flag = false;
     // assign variables to some elements
     project_select = $("#project_select")
@@ -211,7 +179,7 @@
     })
     
     // clear current, load tileset
-    // TODO: set max extent per map
+    // select map
     map_select.on('change',function(){
       if($(".leaflet-draw.leaflet-control").length == 0){
         drawControls(drawnLayers) 
@@ -275,14 +243,15 @@
     $.get('/names', {mapid: map_id},
       function(names){
         <!--console.log('loadGeodata() names', names)-->
+        nameobj_list = []
         name_list = []
         names_html = ''
         for (var i = 0; i < names.length; i++){
-          name_list.push(names[i])
-          names_html+=names[i]+'; '
+          nameobj_list.push(names[i])
         }
-        $('#names').html(names_html)
-        $("#names_in").autocomplete({ source: name_list});
+        for (var i = 0; i < nameobj_list.length; i++){
+          name_list.push(nameobj_list[i].name)
+        }
       }
     )
   }
@@ -372,10 +341,7 @@
           for(t in type_arr){types.push(type_arr[t].sourceLabel)}
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
-          <!--poppy = new L.popup({offset: [0, -30]})-->
-          <!--poppy.setContent('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): '+names+'<br/>'+'type(s): '+types+'</p>')-->
-          l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): '+names+'<br/>'+'type(s): '+types+'</p>');
-          <!--l.bindPopup(poppy);-->
+          l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): <b>'+names+'</b><br/>'+'type(s): '+types+'</p>');
           identifier = f.fid;
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
