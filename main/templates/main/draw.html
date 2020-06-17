@@ -510,13 +510,14 @@
   // create json feature in db
   function createFeature(feat){
     <!--console.log('feat in createFeature()',feat)-->
-    
+    var title = feat.properties.names[0].toponym
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
     formData.append('mapid', $("#map_select").val())
     formData.append('placetypes', 'in the jsonb for now')
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
+    formData.append('nameid', nameobj_list.find(o =>o.name==title).id)
 
     $.ajax({
       type: 'POST',

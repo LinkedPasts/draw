@@ -79,7 +79,13 @@ class Feature(models.Model):
   map = models.ForeignKey('main.Map', db_column='map',
                             related_name='features', on_delete=models.CASCADE)
 
-  name = models.CharField(max_length=255)
+  # preferred name (toponym[0])
+  title = models.CharField(max_length=255)
+  
+  # used if map/project has pre-populated list of names (e.g. bregel)
+  src_name = models.ForeignKey('main.Name', db_column="src_name", null=True,
+                           related_name='src_name',on_delete=models.CASCADE)
+  
   placetype = models.CharField(max_length=20, blank=False, null=False)
   jsonb = JSONField(blank=True, null=True) # includes when
 
@@ -90,7 +96,7 @@ class Feature(models.Model):
 
   def __str__(self):
     #return self.name+'_'+str(self.id)
-    return self.name
+    return self.title
 
   class Meta:
     managed = True

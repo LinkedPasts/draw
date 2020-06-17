@@ -12,7 +12,7 @@ from django.views.generic import (View, CreateView, DeleteView, ListView, Update
 import json, sys, time, datetime, csv, os
 import reverse_geocoder as rg
 from .utils import myprojects
-from main.models import Project, Map, Feature, ProjectUser, Placetype, ProjectPlacetype, MapPlacetype
+from main.models import Project, Map, Feature, Name, ProjectUser, ProjectPlacetype
 from main.forms import ProjectCreateModelForm, MapCreateModelForm
 
 class DrawView(LoginRequiredMixin, View):
@@ -225,6 +225,7 @@ def updateFeature(request):
 def createFeature(request):
   print('in createFeature()', request.POST)
   mapid = int(request.POST['mapid'])
+  nameid = int(request.POST['nameid'])
   print('mapid',mapid,type(mapid))
   if mapid > 0:
     feature = json.loads(request.POST['jsonb'])
@@ -232,9 +233,11 @@ def createFeature(request):
     types = feature['properties']['types']
     ftype = feature['geometry']['type']
     mapobj = get_object_or_404(Map, pk=int(mapid))
+    nameobj = get_object_or_404(Name, pk=int(nameid))
     newfeat = Feature(
           user = request.user,
-            name = names[0]['toponym'],
+            title = names[0]['toponym'],
+            src_name = nameobj,
             placetype = types[0]['identifier'],
             jsonb = feature,
             map = mapobj,
