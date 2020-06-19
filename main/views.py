@@ -289,7 +289,7 @@ def download_project(request, *args, **kwargs):
           str(f.id),
           projlabel,
           f.map.label,
-          f.name,
+          f.title,
           g['coordinates'][0] if g['type'] == 'Point' else None,
           g['coordinates'][1] if g['type'] == 'Point' else None,
           g['coordinates'] if g['type'] != 'Point' else None,
