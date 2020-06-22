@@ -290,12 +290,13 @@
       opacity:0.5}
       
     if(feature.properties.map_id != mapid){
-      markerStyle['fillColor'] = "green"
-      markerStyle['radius'] = 4
+      markerStyle['fillColor'] = "#ff9900"
+      markerStyle['radius'] = 5
     }
     if(feature.geometry.type == 'LineString'){
-      markerStyle['color'] = "green"
-      markerStyle['weight'] = 2
+      markerStyle['color'] = "#cc7a00"
+      markerStyle['weight'] = 3
+      markerStyle['dashArray'] = '10,5'
     }
             
     return markerStyle
