@@ -464,14 +464,15 @@
     return html;
   }
   // delete json feature in db on layer delete
-  function deleteFeature(fid){
+  // lid = leaflet_id
+  function deleteFeature(lid){
     <!--console.log('token','{{ csrf_token }}')-->
-    console.log('deleting fid',fid)
+    console.log('deleting leaflet_id',lid)
     $.ajax({
         type: 'POST',
         url: 'feature_delete/',
         <!--data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,-->
-        data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&fid="+fid,
+        data: "csrfmiddlewaretoken="+ '{{ csrf_token }}' +"&lid="+lid,
         cache: false,
         success: function(result){
           console.log('deleteFeature() result',JSON.stringify(result))
