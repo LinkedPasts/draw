@@ -60,7 +60,7 @@
     <input id="slider" type="range" class="hidden" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)"></div>
     <div id="sidebar">
       <div class="form-group">
-        <h5>Project {{ projid }}</h5> 
+        <h5>Project {{ projid }}</h5>
           <select id="project_select" class="form-control custom-select-sm">
             <option value="0" selected>Select project</option>
           </select>
@@ -113,7 +113,11 @@
     console.log(objarr)
     $("#placetypes").append('<p class="sectionheader mt-2">FEATURE TYPES</p>');
     for(var i in objarr) {
-      $("#placetypes").append('<div class="checkbox"><label><input type="checkbox" name="placetype" value="'+objarr[i].identifier+'"> '+objarr[i].sourceLabel+'</label></div>')
+      var id = objarr[i].identifier
+      var label = objarr[i].sourceLabel=='region'?'province':objarr[i].sourceLabel
+      $("#placetypes").append(
+        '<div class="checkbox"><label><input type="checkbox" name="placetype" value="'+
+          id+'"> '+label+'</label></div>')
     }
     $('input[type=checkbox][name=placetype]')[0].checked='checked'
   }
@@ -133,20 +137,20 @@
     $('#draw_tabs_ul a').on('click', function (e) {
       e.preventDefault()
       $(this).tab('show')
-    })    
+    })
     // get project and map records
     $.ajax({ url: '/draw/fetch_projects/' }).done(function(data){
       projdata = data;
       <!--console.log('projects & maps',projdata)-->
       $.each(data.projects, function (i, p) {
         <!--console.log('proj',p)-->
-        $(project_select).append($('<option>', { 
+        $(project_select).append($('<option>', {
             value: p.label,
-            text : p.title 
+            text : p.title
         }));
       });
     })
-    
+
     // choose project from dropdown
     project_select.on('change',function(){
       <!--projid = parseInt($(this).val())-->
@@ -158,7 +162,7 @@
       clearMap()
       // clear options
       $(map_select).html('')
-      // write select options to dom, display map_select dropdown 
+      // write select options to dom, display map_select dropdown
       maps = projdata.maps.filter(function (el) {
         return el.proj_label == proj;
       });
@@ -168,21 +172,21 @@
       $(map_select).append('<option value="0">Select a map</option>')
       $.each(maps, function (i, map) {
         <!--console.log('map',map)-->
-        $(map_select).append($('<option>', { 
+        $(map_select).append($('<option>', {
             value: map.id,
-            text : map.label 
+            text : map.label +' (id:'+map.id+')'
         }));
       });
       <!--loadGeodata(map.proj_id,mapid)-->
       div_map_select.show(400)
       tabstuff.show(400)
     })
-    
+
     // clear current, load tileset
     // select map
     map_select.on('change',function(){
       if($(".leaflet-draw.leaflet-control").length == 0){
-        drawControls(drawnLayers) 
+        drawControls(drawnLayers)
       }
       $("#scope_btns").removeClass('hidden')
       $("#slider").removeClass('hidden')
@@ -216,9 +220,9 @@
   function get_counts(data) {
     counts={"points":0,"lines":0,"polygons":0}
     // TODO: fill those counters
-    return counts  
+    return counts
   }
-  
+
   function toggle_names(){
     $("#names").toggle("slow")
   }
@@ -264,8 +268,7 @@
   <!--opt={'proj':'bregel','map':'bregel32','extent':[39.4561, 28.7050, 103.3968, 60.4308],-->
         <!--'minzoom':4,'maxzoom':10,'zoom':4}-->
   function addLayer(opt){
-    <!--url = `http://localhost:8181/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;-->
-    url = `http://whgazetteer.org/tiles/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;
+    url = `http://blog.whgazetteer.org/tiles/${opt.proj}/${opt.map}/{z}/{x}/{y}.png`;
     layer = L.tileLayer(url,{'mapExtent':opt.extent,'minZoom':opt.minzoom,
       'maxZoom':opt.maxzoom, 'zoom':opt.zoom, 'pane':'tilelayers'});
     var extent = layer.options.mapExtent
@@ -288,21 +291,21 @@
       weight:1,
       fillOpacity:0.5,
       opacity:0.5}
-      
+
     if(feature.properties.map_id != mapid){
       markerStyle['fillColor'] = "#ff9900"
       markerStyle['radius'] = 5
     }
     if(feature.geometry.type == 'LineString'){
-      markerStyle['color'] = "#cc7a00"
+      markerStyle['color'] = "#009900"
       markerStyle['weight'] = 3
       markerStyle['dashArray'] = '10,5'
     }
-            
+
     return markerStyle
   }
-  
-  
+
+
   function renderMap(geom){
     <!--console.log('dslabel, geom in renderMap()',screen,geom)-->
     <!--console.log('renderMap() geom',geom)-->
@@ -352,7 +355,7 @@
         }
       }) <!-- .addTo(mappy);-->
     }
-    
+
     <!--mappy.on('zoomend', function() {-->
         <!--var currentZoom = mappy.getZoom();-->
         <!--<!--var myRadius = currentZoom*(1/2); //or whatever ratio you prefer-->-->
@@ -360,7 +363,7 @@
         <!--var myWeight = currentZoom*(1/5); //or whatever ratio you prefer-->
         <!--features.setStyle({radius: myRadius, weight: myWeight});-->
     <!--});-->
-    
+
     if (geom['features'].length > 1 && geom['features'][0].type == 'Point') {
       <!--mappy.fitBounds(features.getBounds().pad(1))-->
       mappy.fitBounds(features.getBounds())
@@ -377,7 +380,7 @@
     }
     // count of features per project, map
     calcCounts()
-    
+
     <!--spinner.stop()-->
   }
   function clearMap(){
@@ -504,21 +507,28 @@
           <!--$(".leaflet-draw-actions a")[0].click()-->
         <!--}-->
         <!--console.log('updateFeature() result:',result)-->
-      }   
+      }
     })
   }
-  
+
   // create json feature in db
   function createFeature(feat){
     <!--console.log('feat in createFeature()',feat)-->
     var title = feat.properties.names[0].toponym
+    <!--gotname = nameobj_list.find(o =>o.name==title)-->
+    <!--console.log('gotname',gotname)-->
     var formData = new FormData();
+    if(nameobj_list.find(o =>o.name==title) == undefined){
+      nameid = -1
+    } else {nameid = nameobj_list.find(o =>o.name==title).id}
+    console.log('nameid',nameid)
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
     formData.append('mapid', $("#map_select").val())
     formData.append('placetypes', 'in the jsonb for now')
     formData.append('user','{{ user }}')
     formData.append('jsonb', JSON.stringify(feat))
-    formData.append('nameid', nameobj_list.find(o =>o.name==title).id)
+    <!--formData.append('nameid', nameobj_list.find(o =>o.name==title).id)-->
+    formData.append('nameid', nameid)
 
     $.ajax({
       type: 'POST',
@@ -537,19 +547,19 @@
           // cancel the draw to drop marker from cursor
           $(".leaflet-draw-actions a")[0].click()
         }
-        <!--console.log('data returned from createFeature()',result)-->
-      }   
+        console.log('data returned from createFeature()',result)
+      }
     })
     calcCounts()
   };
-   
+
   function map_init (map, options) {
     // initial
     mappy.setView(L.latLng(35.72, -5.295), 2)
     mappy.createPane('tilelayers').style.zIndex = 200
     // maintain drawnLayers (leaflet) & drawnFeatures (geojson)
     // feature property 'names' added w/popup form
-    
+
     mappy.on(L.Draw.Event.CREATED, function (event) {
       e = event
       <!--console.log('name_list, CREATED event',name_list,e)-->
@@ -565,7 +575,7 @@
       drawnLayers.addLayer(drawnlayer)
       drawnLayers.addTo(mappy)
       drawnlayer.openPopup()
-      
+
       // popup names field
       $("#names_in").focus()
 
@@ -579,8 +589,8 @@
       feat['properties']['map_id'] = mapid
       <!--console.log('feat CREATED, pushed to drawnFeatures[]',feat)-->
       drawnFeatures.push(feat)
-      
-      // save it immediately      
+
+      // save it immediately
       // adding names and types to geojson
       $("#popupform").submit(function(e){
         e.preventDefault();
@@ -603,12 +613,12 @@
         mapobj = maps.find( ({ id }) => id === mapid )
         <!--console.log(mapobj)-->
         if(mapobj.when_constant){feat['when']=mapobj.when}
-        
+
         <!--console.log('props',feat['properties']);-->
         drawnlayer.unbindPopup()
         mappy.closePopup()
         drawnlayer.bindPopup('names: '+names+' types: '+types_arr)
-        //             
+        //
         <!--console.log('written feature',feat)-->
         // write a Feature instance to db
         createFeature(feat)
@@ -620,7 +630,7 @@
       e = event
       console.log('EDITED event',e)
 
-      // leaflet_id of clicked layer 
+      // leaflet_id of clicked layer
       layerid = Number(Object.keys(e.layers._layers)[0]);
 
       // no feat object? get it
@@ -629,13 +639,13 @@
         flag = true;
         console.log('new feat',feat)
       }
-      
+
       // get new geometry
       newgeom = drawnLayers._layers[layerid].toGeoJSON().geometry
       // replace in feat
       feat.geometry = newgeom
-      
-      // update database 
+
+      // update database
       updateFeature(feat)
       $(".leaflet-draw-draw-circlemarker").click()
 
@@ -687,62 +697,6 @@
           return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
       }
   }
-     
+
 </script>
 {% endblock %}
-
-          <!--<div class="sectionheader">TO DATE</div>-->
-          <!--<table class="table table-striped table-sm">-->
-            <!--<thead class="thead-light">-->
-              <!--<tr>-->
-                <!--<th>type</th>-->
-                <!--<th>count</th>-->
-              <!--</tr>-->
-            <!--</thead>-->
-            <!--<tbody>-->
-              <!--<tr>-->
-                <!--<td>settlement</td>-->
-                <!--<td>452</td>-->
-              <!--</tr>-->
-              <!--<tr>-->
-                <!--<td>province</td>-->
-                <!--<td>35</td>-->
-              <!--</tr>-->
-            <!--</tbody>-->
-          <!--</table>-->
-          <!--<div class="sectionheader">THIS SESSION</div>-->
-          <!--<table class="table table-striped table-sm">-->
-            <!--<thead class="thead-light">-->
-              <!--<tr>-->
-                <!--<th>type</th>-->
-                <!--<th>count</th>-->
-              <!--</tr>-->
-            <!--</thead>-->
-            <!--<tbody>-->
-              <!--<tr>-->
-                <!--<td>settlement</td>-->
-                <!--<td>12</td>-->
-              <!--</tr>-->
-              <!--<tr>-->
-                <!--<td>province</td>-->
-                <!--<td>0</td>-->
-              <!--</tr>-->
-            <!--</tbody>-->
-          <!--</table>        -->
-          <!--</div>-->
-
-    <!--$.get('/names', {mapid: map_id},-->
-      <!--function(names){-->
-        <!--<!--console.log('loadGeodata() names', names)-->-->
-        <!--name_list = []-->
-        <!--names_html = ''-->
-        <!--for (var i = 0; i < names.length; i++){-->
-          <!--name_list.push(names[i])-->
-          <!--names_html+=names[i]+'; '-->
-        <!--}-->
-        <!--$('#names').html(names_html)-->
-        <!--$("#names_in").autocomplete({-->
-          <!--source: name_list-->
-        <!--});-->
-      <!--}-->
-    <!--)-->

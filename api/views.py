@@ -24,10 +24,14 @@ class MapNamesView(View):
         #print('MapNamesView GET:',request.GET)
         namelist=[]
         mapid = request.GET.get('mapid')
-        mapnum = re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1)
-        print('mapnum from label',mapnum)
-        #qs=Name.objects.filter(maps__contains=[mapnum],type__in=['settlement'],flag=False).values_list('name','id','type')
+        print('type(mapid)',type(mapid))
+        # TODO: not all mapnums are integers, e.g. 36a
+        if mapid.isdigit():
+            mapnum = int(re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1))
+        else:
+            mapnum = re.search('_(.*)$',get_object_or_404(Map,pk=mapid).label).group(1)
         qs=Name.objects.filter(maps__contains=[mapnum],flag=True).values_list('name','id','type')
+        #print('mapnum from label, count',mapnum,len(qs))
         for n in qs:
             namelist.append({"name":n[0],"id":n[1]})
         return JsonResponse(namelist, safe=False, json_dumps_params={'ensure_ascii':False})

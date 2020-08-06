@@ -234,6 +234,7 @@ def createFeature(request):
     ftype = feature['geometry']['type']
     mapobj = get_object_or_404(Map, pk=int(mapid))
     nameobj = get_object_or_404(Name, pk=int(nameid))
+    print('nameobj',nameobj)
     newfeat = Feature(
           user = request.user,
             title = names[0]['toponym'],
