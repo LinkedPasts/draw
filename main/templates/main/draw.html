@@ -345,7 +345,8 @@
           for(t in type_arr){types.push(type_arr[t].sourceLabel)}
           drawnFeatures.push(f)
           l.addTo(drawnLayers)
-          l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): <b>'+names+'</b><br/>'+'type(s): '+types+'</p>');
+          <!--l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): <b>'+names+'</b><br/>'+'type(s): '+types+'</p>');-->
+          l.bindPopup(popupEditForm(f));
           identifier = f.fid;
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
@@ -455,9 +456,12 @@
       Save it</button></p></form></div>';
   <!--<p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\-->
   function popupEditForm(feat) {
+    names = []
+    for(n in f['properties']['names']){names.push(f.properties.names[n].toponym)}
     console.log('popup names',f['properties']['names'])
+    console.log('popup types',f['properties']['types'])
     html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
-      name="names" value="'+f['properties']['names']+'"></p> \
+      name="names" value="'+names.join()+'"></p> \
       <input type="hidden" name="lid" value="'+f['properties']['leaflet_id']+'">\
       </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
       Save</button></p></div>';
@@ -677,27 +681,27 @@
     });
 
   }
- function toWKT(layer) {
-      var lng, lat, coords = [];
-      if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
-          var latlngs = layer.getLatLngs();
-          for (var i = 0; i < latlngs.length; i++) {
-              latlngs[i]
-              coords.push(latlngs[i].lng + " " + latlngs[i].lat);
-              if (i === 0) {
-                  lng = latlngs[i].lng;
-                  lat = latlngs[i].lat;
-              }
-      };
-          if (layer instanceof L.Polygon) {
-              return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
-          } else if (layer instanceof L.Polyline) {
-              return "LINESTRING(" + coords.join(",") + ")";
-          }
-      } else if (layer instanceof L.Marker) {
-          return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
-      }
-  }
+  function toWKT(layer) {
+       var lng, lat, coords = [];
+       if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+           var latlngs = layer.getLatLngs();
+           for (var i = 0; i < latlngs.length; i++) {
+               latlngs[i]
+               coords.push(latlngs[i].lng + " " + latlngs[i].lat);
+               if (i === 0) {
+                   lng = latlngs[i].lng;
+                   lat = latlngs[i].lat;
+               }
+       };
+           if (layer instanceof L.Polygon) {
+               return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
+           } else if (layer instanceof L.Polyline) {
+               return "LINESTRING(" + coords.join(",") + ")";
+           }
+       } else if (layer instanceof L.Marker) {
+           return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
+       }
+   }
 
 </script>
 {% endblock %}
