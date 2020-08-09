@@ -42,10 +42,10 @@ class DashboardView(LoginRequiredMixin, ListView):
     me = self.request.user
     if me.username in ['admin','karlg']:
       print('in get_queryset() if',me)
-      return Project.objects.all().order_by('-id')
+      return Project.objects.all().order_by('label')
     else:
       # returns permitted datasets (rw) + black and dplace (ro)
-      return Project.objects.filter( Q(id__in=myprojects(me)) | Q(owner=me) ).order_by('-id')
+      return Project.objects.filter( Q(id__in=myprojects(me)) | Q(owner=me) ).order_by('label')
 
   def get_context_data(self, *args, **kwargs):
     me = self.request.user
@@ -86,7 +86,7 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     print('ProjectUpdateView get_context_data() kwargs:',self.kwargs)
     id_ = self.kwargs.get("pk")
     proj = get_object_or_404(Project, id=id_)
-    maps = Map.objects.all().filter(project=proj,tiles=True).order_by('-create_date')
+    maps = Map.objects.all().filter(project=proj,tiles=True).order_by('label')
 
     context['maps'] = maps
     context['project_id'] = id_
@@ -158,7 +158,7 @@ def fetchProjects(request):
     collab_projects = ProjectUser.objects.filter(user=u).values_list('project',flat=True)
     projects = Project.objects.filter( Q(id__in=collab_projects) | Q(owner=u) )
   #maps = Map.objects.filter(tiles=True)
-  maps = Map.objects.filter(tiles=True,project__in=projects)
+  maps = Map.objects.filter(tiles=True,project__in=projects).order_by('label')
   #feature_count = sum([m.features.count() for m in maps])
   for p in projects:
     count=sum([m.features.count() for m in p.maps.all()])

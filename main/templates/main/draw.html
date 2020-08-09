@@ -456,12 +456,13 @@
       Save it</button></p></form></div>';
   <!--<p>Type: <input type="text" id="type_in" name="type" value="'+feat['properties']['type']+'"> </p>\-->
   function popupEditForm(feat) {
-    names = []
+    names = []; types = []
     for(n in f['properties']['names']){names.push(f.properties.names[n].toponym)}
+    for(t in f['properties']['types']){types.push(f.properties.types[t].sourceLabel)}
     console.log('popup names',f['properties']['names'])
     console.log('popup types',f['properties']['types'])
     html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
-      name="names" value="'+names.join()+'"></p> \
+      name="names" value="'+names.join()+'"></p><p>Types(s): <b>'+types.join()+'</b></p> \
       <input type="hidden" name="lid" value="'+f['properties']['leaflet_id']+'">\
       </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
       Save</button></p></div>';
