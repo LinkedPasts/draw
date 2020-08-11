@@ -92,9 +92,9 @@
             </label><br/>
             <label class="radio-inline">
               <input type="radio" name="scope" value="this"> This map (<span class="cnt-this font-italic"></span>)
-            </label>
+            </label><br/>
+            <input type="checkbox" name="lines" checked = 'checked'> Toggle linestrings
           </div>
-          <!--<p class="sectionheader mt-2">FEATURE TYPES</p>-->
           <div id="placetypes"></div>
         </div> <!-- tab_bench -->
         <div id="download" class="tab-pane fade options" role="tabpanel">
@@ -132,6 +132,7 @@
     div_map_select = $("#div_map_select")
     tabstuff = $("#tabstuff")
     scope_btns = $('input[type=radio][name=scope]')
+    lines_box = $('input[type=checkbox][name=lines]')
     poly = true
 
     $('#draw_tabs_ul a').on('click', function (e) {
@@ -216,6 +217,18 @@
       }
     })
 
+    // hide/show line features
+    // filter features (all/this map)
+    lines_box.change(function(){
+      <!--foo = $(this)-->
+      console.log($(this)[0].checked)
+      if ($(this)[0].checked==false) {
+        for(x in lines){mappy.removeLayer(idToFeature[lines[x]])}
+      } else {
+        for(x in lines){mappy.addLayer(idToFeature[lines[x]])}
+      }
+    })
+    
   })
   function get_counts(data) {
     counts={"points":0,"lines":0,"polygons":0}
@@ -319,7 +332,7 @@
         mappy.removeLayer(features)
       }
       idToFeature = {}  // for layer lookup by fid
-      others=[]; polygons = []
+      others=[]; polygons = []; lines = []
       features = L.geoJSON(geom, {
         <!--style: styler(geomtype),-->
         pointToLayer: function (feature, latlng) {
@@ -351,6 +364,9 @@
           l.setStyle(styleFunc(f))
           if (f.properties.map_id != mapid){
             others.push(identifier)
+          }
+          if (f.geometry.type == 'LineString' && f.properties.map_id != mapid){
+            lines.push(identifier)
           }
           idToFeature[identifier] = layer
         }
@@ -459,8 +475,8 @@
     names = []; types = []
     for(n in f['properties']['names']){names.push(f.properties.names[n].toponym)}
     for(t in f['properties']['types']){types.push(f.properties.types[t].sourceLabel)}
-    console.log('popup names',f['properties']['names'])
-    console.log('popup types',f['properties']['types'])
+    <!--console.log('popup names',f['properties']['names'])-->
+    <!--console.log('popup types',f['properties']['types'])-->
     html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
       name="names" value="'+names.join()+'"></p><p>Types(s): <b>'+types.join()+'</b></p> \
       <input type="hidden" name="lid" value="'+f['properties']['leaflet_id']+'">\
