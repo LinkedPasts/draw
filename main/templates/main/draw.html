@@ -93,7 +93,7 @@
             <label class="radio-inline">
               <input type="radio" name="scope" value="this"> This map (<span class="cnt-this font-italic"></span>)
             </label><br/>
-            <input type="checkbox" name="lines" checked = 'checked'> Toggle linestrings
+            <input type="checkbox" name="lines"> Toggle lines
           </div>
           <div id="placetypes"></div>
         </div> <!-- tab_bench -->
@@ -252,6 +252,8 @@
         geom['properties']['counts']
         if(geom.features.length < 15000) {
           renderMap(geom)
+          // hide lines not in this map
+          for(x in lines){mappy.removeLayer(idToFeature[lines[x]])}
         } else {
           <!--spinner.stop()-->
           $(".toomany").html('too many features to map (> '+geom.features.length+'), sorry!')
@@ -309,8 +311,10 @@
       markerStyle['fillColor'] = "#ff9900"
       markerStyle['radius'] = 5
     }
+    // TODO: too project-specific
+    var ftype = feature.properties.types[0].sourceLabel
     if(feature.geometry.type == 'LineString'){
-      markerStyle['color'] = "#009900"
+      markerStyle['color'] = ftype=="region"?"#009900":ftype=="dynasty/state"?"#990000":"#000099"
       markerStyle['weight'] = 3
       markerStyle['dashArray'] = '10,5'
     }
@@ -357,8 +361,8 @@
           for(n in name_arr){names.push(name_arr[n].toponym)}
           for(t in type_arr){types.push(type_arr[t].sourceLabel)}
           drawnFeatures.push(f)
+          if (f)
           l.addTo(drawnLayers)
-          <!--l.bindPopup('<p id="draggy">id: '+f.fid+'<br/>'+'name(s): <b>'+names+'</b><br/>'+'type(s): '+types+'</p>');-->
           l.bindPopup(popupEditForm(f));
           identifier = f.fid;
           l.setStyle(styleFunc(f))
@@ -480,8 +484,8 @@
     html = '<div><form id="popupeditform"><p>Name(s): <input type="text" id="names_in"  \
       name="names" value="'+names.join()+'"></p><p>Types(s): <b>'+types.join()+'</b></p> \
       <input type="hidden" name="lid" value="'+f['properties']['leaflet_id']+'">\
-      </form><p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> \
-      Save</button></p></div>';
+      </form></div>';
+      // <p><button id="btn_edit" type="text" class="btn btn-primary btn-sm"> Save</button></p>
     return html;
   }
   // delete json feature in db on layer delete
